@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <link th:href="@{/css/style.css}" rel="stylesheet" type="text/css">
+    <title>PicTweet</title>
+</head>
+
+<body>
+
+<div th:insert="~{header :: header}"></div>
+
+
+<div class="contents row">
+    <div class="content_post" th:style="'background-image: url(' + (${tweet.image} != null ? ${tweet.image} : 'none') + ');'">
+        <div th:if="${#authentication.name == tweet.user.email}">
+            <div class="more">
+            <span><img th:src="@{/images/arrow_top.png}" /></span>
+            <ul class="more_list">
+                    <li>
+                        <a th:href="@{/user/{userId}/tweets/{tweetId}/edit(userId=${tweet.user.id}, tweetId=${tweet.id})}",class="update-btn">編集</a>
+                    </li>
+                    <li>
+                        <form th:action="@{/user/{userId}/tweets/{tweetId}/delete(userId=${tweet.user.id}, tweetId=${tweet.id})}" method="post">
+                            <input type="submit" class="delete-btn" value="削除">
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <p th:text="${tweet.text}"></p>
+        <span class="name">
+      <a th:href="@{'/users/' + ${tweet.user.id}}">
+        <span>投稿者</span><span th:text="${tweet.user.nickname}"></span>
+      </a>
+    </span>
+    </div>
+
+    <div class="container">
+        <div th:if="${#authorization.expression('isAuthenticated()')}">
+            <div th:if="${errorMessages}" th:each="error : ${errorMessages}">
+                <div th:text="${error.defaultMessage}"></div>
+            </div>
+            <div th:insert="comments/new :: newComment"></div>
+        </div>
+        <div th:if="${#authorization.expression('!isAuthenticated()')}">
+            <strong>
+                <p>※※※ コメントの投稿には新規登録/ログインが必要です ※※※</p>
+            </strong>
+        </div>
+        <div class="comments">
+            <h4>＜コメント一覧＞</h4>
+            <div th:insert="comments/show :: showComment"></div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

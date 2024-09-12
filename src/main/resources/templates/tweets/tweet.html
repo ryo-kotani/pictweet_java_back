@@ -1,0 +1,27 @@
+<html xmlns:th="http://www.thymeleaf.org" lang="ja">
+<div th:fragment="tweetList">
+  <div class="more">
+    <span><img th:src="@{/images/arrow_top.png}" /></span>
+    <ul class="more_list">
+      <li>
+        <a th:href="@{/tweets/{tweet_id}(tweet_id=${tweet.id})}">詳細</a>
+      </li>
+      <div th:if="${#authentication.name == tweet.user.email}">
+        <li>
+          <a th:href="@{/user/{userId}/tweets/{tweetId}/edit(userId=${tweet.user.id}, tweetId=${tweet.id})}" class="update-btn">編集</a>
+        </li>
+        <li>
+          <form th:action="@{/user/{userId}/tweets/{tweetId}/delete(userId=${tweet.user.id}, tweetId=${tweet.id})}" method="post">
+            <input type="submit" class="delete-btn" value="削除">
+          </form>
+        </li>
+      </div>
+    </ul>
+  </div>
+  <p th:text="${tweet.getText()}"></p>
+  <span class="name">
+        <a th:href="@{/users/{id}(id=${tweet.user.id})}">
+            <span>投稿者</span><span th:text="${tweet.user.nickname}"></span>
+        </a>
+    </span>
+</div>

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <link th:href="@{/css/style.css}" rel="stylesheet" type="text/css">
+  <title>PicTweet</title>
+</head>
+
+<body>
+<div th:insert="~{header :: header}"></div>
+
+<div class="contents row">
+  <p th:text="${user.nickname} + 'さんの投稿一覧'"></p>
+
+  <div class="contents row">
+    <div th:each="tweet : ${user.tweets}" class="content_post" th:style="'background-image: url(' + (${tweet.image} != null ? ${tweet.image} : 'none') + ');'">
+      <div th:insert="~{tweets/tweet :: tweetList}"></div>
+    </div>
+  </div>
+</div>
+
+
+<div th:insert="~{footer :: footer}"></div>
+
+</body>
+</html>

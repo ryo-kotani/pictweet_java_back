@@ -1,0 +1,13 @@
+<div xmlns:th="http://www.thymeleaf.org" th:fragment="showComment">
+
+    <div class="comment-area">
+        <div th:if="${#lists.isEmpty(comments)}">
+            <p class="no-comment">コメントはまだありません。</p>
+        </div>
+        <div class="comment-wrapper" th:each="comment:${comments}">
+            <div class="comment-top">
+                <div th:text="${comment.user.nickname} + 'さん: ' + ${comment.text}"></div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ja">
+<body>
+<div th:fragment="form">
+    <input type="file" th:field="*{image}" placeholder="画像を選択" />
+    <textarea th:field="*{text}" placeholder="text" rows="10"></textarea>
+    <input type="submit" value="SEND" />
+</div>
+</body>
+</html>

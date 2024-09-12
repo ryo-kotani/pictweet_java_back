@@ -1,0 +1,11 @@
+<html xmlns:th="http://www.thymeleaf.org" >
+<body th:fragment="newComment">
+    <div class="comment-title">
+        <h2>コメントする</h2>
+    </div>
+    <form th:action="@{/tweets/{tweetId}/comment(tweetId=${tweet.id})}" method="post" th:object="${commentForm}">
+        <textarea id="text" th:field="*{text}" placeholder="コメントする" rows="2"></textarea>
+        <input type="submit">
+    </form>
+</body>
+</html>
