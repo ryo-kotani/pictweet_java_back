@@ -19,8 +19,6 @@ public class UserAuthenticationService implements UserDetailsService {
             throw new UsernameNotFoundException("User not found with email: " + email);
         }
         userEntity.getTweets().size(); // 明示的にコレクションを初期化
-//        ここのUserはspring securityのUserなのでUserEntityの引数とは異なる
-//        return new User(userEntity.getNickname(), userEntity.getPassword(), Collections.emptyList());
         return new CustomUserDetail(userEntity);
     }
 }
