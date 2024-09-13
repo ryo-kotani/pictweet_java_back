@@ -18,7 +18,6 @@ public class UserAuthenticationService implements UserDetailsService {
         if (userEntity == null) {
             throw new UsernameNotFoundException("User not found with email: " + email);
         }
-        userEntity.getTweets().size(); // 明示的にコレクションを初期化
         return new CustomUserDetail(userEntity);
     }
 }
