@@ -1,32 +1,27 @@
 package in.tech_camp.pictweet.system;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import java.util.List;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
-import org.springframework.mock.web.MockMultipartFile;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import in.tech_camp.pictweet.PicTweetApplication;
 import in.tech_camp.pictweet.CommentEntity;
 import in.tech_camp.pictweet.CommentRepository;
+import in.tech_camp.pictweet.PicTweetApplication;
 import in.tech_camp.pictweet.TweetEntity;
 import in.tech_camp.pictweet.TweetRepository;
 import in.tech_camp.pictweet.UserEntity;
@@ -47,8 +42,6 @@ public class CommentIntegrationTest {
   private UserForm userForm;
   private UserEntity userEntity;
 
-  private MockMultipartFile imageFile;
-
   @Autowired
   private UserService userService;
 
@@ -68,14 +61,6 @@ public class CommentIntegrationTest {
       userEntity.setPassword(userForm.getPassword());
 
       userService.registerNewUser(userEntity);
-
-      // 画像ファイルの作成
-      imageFile = new MockMultipartFile(
-      "image", // フィールド名
-      "test_image.png", // ファイル名
-      "image/png", // コンテンツタイプ
-      new byte[] {} // バイナリデータの配列（ここでは空の配列にしています）
-      );
   }
   @Test
   public void ログインしたユーザーはツイート詳細ページでコメント投稿できる() throws Exception {
@@ -84,16 +69,15 @@ public class CommentIntegrationTest {
 
       // ツイートを投稿
       String tweetText = "テストツイート詳細";
-      mockMvc.perform(multipart("/tweets")
-              .file(imageFile)
+      mockMvc.perform(post("/tweets")
               .param("text", tweetText)
+              .param("image", "test.png")
               .with(csrf())
               .session((MockHttpSession) session))
               .andExpect(status().isFound())
               .andExpect(redirectedUrl("/"));
 
       // 投稿されたツイートを取得
-      // ツイート1を削除
       List<TweetEntity> tweets = tweetRepository.findAll();
       Integer tweetId = tweets.get(0).getId();
 

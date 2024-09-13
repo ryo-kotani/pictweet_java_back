@@ -44,7 +44,7 @@ public class TweetFormUnitTest {
 
     @Test
     public void 画像が空では投稿できない() {
-        tweetForm.setImage(null);
+        tweetForm.setImage("");
 
         Set<ConstraintViolation<TweetForm>> violations = validator.validate(tweetForm, ValidGroup1.class);
         assertEquals(1, violations.size());

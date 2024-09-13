@@ -1,53 +1,49 @@
 package in.tech_camp.pictweet.system;
 
+import java.util.List;
+
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockHttpSession;
-import org.springframework.mock.web.MockMultipartFile;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
-import java.util.List;
-
 import in.tech_camp.pictweet.PicTweetApplication;
-import in.tech_camp.pictweet.TweetRepository;
 import in.tech_camp.pictweet.TweetEntity;
 import in.tech_camp.pictweet.TweetForm;
+import in.tech_camp.pictweet.TweetRepository;
 import in.tech_camp.pictweet.UserEntity;
 import in.tech_camp.pictweet.UserForm;
 import in.tech_camp.pictweet.UserService;
-import in.tech_camp.pictweet.support.LoginSupport;
 import in.tech_camp.pictweet.factories.TweetFormFactory;
 import in.tech_camp.pictweet.factories.UserFormFactory;
+import in.tech_camp.pictweet.support.LoginSupport;
 import jakarta.servlet.http.HttpSession;
 
 @ActiveProfiles("test")
 @SpringBootTest(classes = PicTweetApplication.class)
 @AutoConfigureMockMvc
 public class TweetIntegrationTest {
-
-    @Autowired
-    private MockMvc mockMvc;
-
     private UserForm userForm;
     private UserEntity userEntity;
 
-    private MockMultipartFile imageFile;
+    @Autowired
+    private MockMvc mockMvc;
 
     @Autowired
     private UserService userService;
@@ -65,14 +61,6 @@ public class TweetIntegrationTest {
         userEntity.setPassword(userForm.getPassword());
 
         userService.registerNewUser(userEntity);
-        LoginSupport loginSupport = new LoginSupport();
-        // 画像ファイルの作成
-        imageFile = new MockMultipartFile(
-        "image", // フィールド名
-        "test_image.png", // ファイル名
-        "image/png", // コンテンツタイプ
-        new byte[] {} // バイナリデータの配列（ここでは空の配列にしています）
-        );
     }
 
     @Test
@@ -87,9 +75,9 @@ public class TweetIntegrationTest {
                 .andExpect(view().name("tweets/new"));
 
         // 新規投稿を行う
-        mockMvc.perform(multipart("/tweets")
-                .file(imageFile) // 画像ファイルをここで使う
-                .param("text",tweetText) // ツイートの内容を指定
+        mockMvc.perform(post("/tweets")
+                .param("text", tweetText)
+                .param("image", "test.png")
                 .with(csrf())
                 .session((MockHttpSession) session)) // セッション情報を指定
                 .andExpect(status().isFound())
@@ -116,16 +104,15 @@ public class TweetIntegrationTest {
 
     @Test
     public void ログインしたユーザーは自分が投稿したツイートの編集ができる() throws Exception {
-      Integer userId = userEntity.getId();
         // ユーザーがツイートを投稿する
         String originalTweetText = "テスト2";
 
         HttpSession session = LoginSupport.login(mockMvc, userForm);
 
         // ツイートを投稿
-        mockMvc.perform(multipart("/tweets")
-                .file(imageFile)
+        mockMvc.perform(post("/tweets")
                 .param("text", originalTweetText)
+                .param("image", "test.png")
                 .with(csrf())
                 .session((MockHttpSession) session))
                 .andExpect(status().isFound())
@@ -140,7 +127,7 @@ public class TweetIntegrationTest {
                 .andExpect(content().string(containsString("編集"))); // 編集リンクがあることを確認
 
         // 編集ページに遷移
-        mockMvc.perform(get("/user/{userId}/tweets/{tweetId}/edit", userId ,tweets.get(0).getId())
+        mockMvc.perform(get("/tweets/{tweetId}/edit" ,tweets.get(0).getId())
                 .session((MockHttpSession) session))
                 .andExpect(status().isOk())
                 .andExpect(view().name("tweets/edit")) // 編集ページに正しく遷移
@@ -148,9 +135,9 @@ public class TweetIntegrationTest {
 
         // ツイート内容を編集
         String updatedTweetText = "更新後のツイート";
-        mockMvc.perform(multipart("/user/{userId}/tweets/{tweetId}/update", userId ,tweets.get(0).getId()) // 編集処理
-                .file(imageFile)
+        mockMvc.perform(post("/tweets/{tweetId}/update" ,tweets.get(0).getId()) // 編集処理
                 .param("text", updatedTweetText)
+                .param("image", "test.png")
                 .with(csrf())
                 .session((MockHttpSession) session))
                 .andExpect(status().isFound())
@@ -174,18 +161,17 @@ public class TweetIntegrationTest {
         TweetForm tweetForm = TweetFormFactory.createTweet();
         TweetEntity tweet = new TweetEntity();
         tweet.setUser(anotherUser);
-        tweet.setImage("/uploads/test.png");
+        tweet.setImage(tweetForm.getImage());
         tweet.setText(tweetForm.getText());
         tweetRepository.save(tweet);
 
-        Integer userId = anotherUser.getId();
         // 他のユーザーが投稿したツイートの編集画面へ遷移しようとする
         HttpSession session = LoginSupport.login(mockMvc, userForm);
 
         Integer tweetId = tweet.getId();
 
-        mockMvc.perform(get("/user/{userId}/tweets/{tweetId}/edit",  userId, tweetId)
-                .session((MockHttpSession) session))
+        mockMvc.perform(get("/tweets/{tweetId}/edit", tweetId)
+                .session((MockHttpSession) session)) //ここでエラー
                 .andExpect(redirectedUrl("/")); // アクセス拒否が期待される
 
         // リダイレクトを確認
@@ -211,9 +197,9 @@ public class TweetIntegrationTest {
 
       // ツイートを投稿
       String tweetText = "テスト3";
-      mockMvc.perform(multipart("/tweets")
-              .file(imageFile)
+      mockMvc.perform(post("/tweets")
               .param("text", tweetText)
+              .param("image", "test.png")
               .with(csrf())
               .session((MockHttpSession) session))
               .andExpect(status().isFound())
@@ -232,7 +218,7 @@ public class TweetIntegrationTest {
       List<TweetEntity> tweetsBeforeDeletion = tweetRepository.findAll();
       Integer initialCount = tweetsBeforeDeletion.size();
 
-      mockMvc.perform(post("/user/{userId}/tweets/{tweetId}/delete", userEntity.getId(), tweets.get(0).getId()) // ツイートIDを取得して削除
+      mockMvc.perform(post("/tweets/{tweetId}/delete", userEntity.getId(), tweets.get(0).getId()) // ツイートIDを取得して削除
               .with(csrf())
               .session((MockHttpSession) session))
               .andExpect(status().isFound())
@@ -288,9 +274,9 @@ public class TweetIntegrationTest {
 
       // ツイートを投稿
       String tweetText = "テスト5";
-      mockMvc.perform(multipart("/tweets")
-              .file(imageFile)
+      mockMvc.perform(post("/tweets")
               .param("text", tweetText)
+              .param("image", "test.png")
               .with(csrf())
               .session((MockHttpSession) session))
               .andExpect(status().isFound())
@@ -314,9 +300,9 @@ public class TweetIntegrationTest {
 
       // ツイートを投稿
       String tweetText = "テスト6";
-      mockMvc.perform(multipart("/tweets")
-              .file(imageFile)
+      mockMvc.perform(post("/tweets")
               .param("text", tweetText)
+              .param("image", "test.png")
               .with(csrf())
               .session((MockHttpSession) session))
               .andExpect(status().isFound())

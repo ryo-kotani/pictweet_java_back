@@ -23,5 +23,5 @@ public class LoginSupport {
             .andExpect(redirectedUrl("/"))
             .andReturn();
     return (MockHttpSession) loginResult.getRequest().getSession();
-}
+  }
 }
