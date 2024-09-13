@@ -15,7 +15,7 @@
     <div th:if="${errorMessages}" th:each="error : ${errorMessages}">
       <div th:text="${error}"></div>
     </div>
-    <form  th:action="@{/user/{userId}/tweets/{tweetId}/update(userId=${#authentication?.principal.getId()},tweetId=${tweetEntity.getId()})}" th:object="${tweetEntity}" th:method="post" enctype="multipart/form-data">
+    <form  th:action="@{/tweets/{tweetId}/update(tweetId=${tweetEntity.getId()})}" th:object="${tweetEntity}" th:method="post">
       <div th:insert="~{tweets/form :: form}"></div>
     </form>
   </div>

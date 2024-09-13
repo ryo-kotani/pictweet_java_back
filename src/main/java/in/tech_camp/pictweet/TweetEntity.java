@@ -1,10 +1,18 @@
 package in.tech_camp.pictweet;
-// import lombok.AllArgsConstructor; 削除
-import jakarta.persistence.*;
+import java.util.List;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.ToString;
-
-import java.util.List;
 
 
 @Data
@@ -24,7 +32,6 @@ public class TweetEntity {
     @JoinColumn(name = "user_id")
     private UserEntity user;
 
-    //cascade→親のIssueEntityが削除された時に、関連する子CommentEntityも自動的に削除
     @ToString.Exclude
     @OneToMany(mappedBy = "tweet",cascade = CascadeType.REMOVE,fetch = FetchType.EAGER)
     private List<CommentEntity> comments;

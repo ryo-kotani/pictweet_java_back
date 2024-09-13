@@ -19,10 +19,10 @@
             <span><img th:src="@{/images/arrow_top.png}" /></span>
             <ul class="more_list">
                     <li>
-                        <a th:href="@{/user/{userId}/tweets/{tweetId}/edit(userId=${tweet.user.id}, tweetId=${tweet.id})}",class="update-btn">編集</a>
+                        <a th:href="@{/tweets/{tweetId}/edit(tweetId=${tweet.id})}",class="update-btn">編集</a>
                     </li>
                     <li>
-                        <form th:action="@{/user/{userId}/tweets/{tweetId}/delete(userId=${tweet.user.id}, tweetId=${tweet.id})}" method="post">
+                        <form th:action="@{/tweets/{tweetId}/delete(tweetId=${tweet.id})}" method="post">
                             <input type="submit" class="delete-btn" value="削除">
                         </form>
                     </li>
