@@ -32,6 +32,15 @@
                     <input type="password" id="password" name="password"/>
                 </div>
 
+                <div class='field'>
+                    <div class='field-label'>
+                      <label for="password_confirmation">Password confirmation</label>
+                    </div>
+                    <div class='field-input'>
+                      <input type="password" th:field="*{passwordConfirmation}" id="password_confirmation" autocomplete="off"/>
+                    </div>
+                </div>
+
                 <div class="actions">
                     <input type="submit",class="actions">
                 </div>

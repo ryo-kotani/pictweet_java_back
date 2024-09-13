@@ -22,4 +22,7 @@ public class UserForm {
     @NotBlank(message = "Password can't be blank",groups = ValidGroup1.class)
     @Length(min = 6, max = 128, message = "Password should be between 6 and 128 characters",groups = ValidGroup2.class)
     private String password;
+
+    @NotBlank(message = "Password confirmation can't be blank",groups = ValidGroup1.class)
+    private String passwordConfirmation;
 }

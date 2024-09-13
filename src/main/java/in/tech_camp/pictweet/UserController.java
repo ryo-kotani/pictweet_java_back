@@ -31,6 +31,9 @@ public class UserController {
 
     @PostMapping("/register")
     public String registerNewUser(@ModelAttribute("user") @Validated(GroupOrder.class) UserForm userForm, BindingResult result, Model model) {
+        if (!userForm.getPassword().equals(userForm.getPasswordConfirmation())) {
+            result.rejectValue("passwordConfirmation", "error.user", "Password confirmation doesn't match Password");
+          }
         // バリデーションエラーチェック
         if (result.hasErrors()) {
             List<String> errorMessages = result.getAllErrors().stream()
