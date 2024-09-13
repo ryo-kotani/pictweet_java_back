@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS users (
-   id       INT             NOT NULL AUTO_INCREMENT,
+   id       SERIAL             NOT NULL,
    nickname VARCHAR(128)    NOT NULL,
    email VARCHAR(128)    NOT NULL UNIQUE,
    password VARCHAR(512)    NOT NULL,
@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 CREATE TABLE IF NOT EXISTS tweets (
-    id INT NOT NULL AUTO_INCREMENT,
+    id SERIAL NOT NULL,
     text VARCHAR(256) NOT NULL,
     image VARCHAR(256) NOT NULL,
     user_id INT NOT NULL,
@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS tweets (
 );
 
 CREATE TABLE IF NOT EXISTS comments (
-  id       INT          NOT NULL AUTO_INCREMENT,
+  id       SERIAL          NOT NULL,
   text     VARCHAR(256) NOT NULL,
   user_id  INT          NOT NULL,
   tweet_id INT          NOT NULL,
