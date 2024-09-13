@@ -1,6 +1,5 @@
 package in.tech_camp.pictweet;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -12,19 +11,16 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import jakarta.persistence.EntityNotFoundException;
+import lombok.AllArgsConstructor;
 
 @Controller
 @RequestMapping("/tweets")
+@AllArgsConstructor
 public class CommentController {
 
-    @Autowired
-    private CommentRepository commentRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private TweetRepository tweetRepository;
+    private final CommentRepository commentRepository;
+    private final UserRepository userRepository;
+    private final TweetRepository tweetRepository;
 
     @PostMapping("/{tweetId}/comment")
     public String postComment(@ModelAttribute("commentForm") @Validated(GroupOrder.class) CommentForm commentForm,
@@ -36,13 +32,8 @@ public class CommentController {
         String email = authentication.getName();
         UserEntity user = userRepository.findByEmail(email);
         TweetEntity tweet;
-        try {
-            // Tweet情報取得
-            tweet = tweetRepository.findById(tweetId)
-                    .orElseThrow(() -> new EntityNotFoundException("Tweet not found: " + tweetId));
-        } catch (EntityNotFoundException ex) {
-            return "/";
-        }
+        tweet = tweetRepository.findById(tweetId)
+                    .orElseThrow(() -> new EntityNotFoundException("ツイートが見つかりませんでした。"));
 
         // バリデーションエラーがあるかチェックする
         if (result.hasErrors()) {

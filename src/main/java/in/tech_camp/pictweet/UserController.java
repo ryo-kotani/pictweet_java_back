@@ -1,25 +1,28 @@
 package in.tech_camp.pictweet;
 
-import jakarta.persistence.EntityNotFoundException;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import jakarta.persistence.EntityNotFoundException;
+import lombok.AllArgsConstructor;
 
 @Controller
+@AllArgsConstructor
 public class UserController {
-    @Autowired
-    private UserRepository userRepository;
 
-    @Autowired
-    private UserService userService;
+    private final UserRepository userRepository;
+    private final UserService userService;
 
     @GetMapping("/registerForm")
     public String register(@ModelAttribute("user")UserForm userForm){
@@ -40,18 +43,13 @@ public class UserController {
             model.addAttribute("user", userForm);
             return register(userForm);
         }
-        try {
-            UserEntity userEntity = new UserEntity();
+        UserEntity userEntity = new UserEntity();
 
-            userEntity.setNickname(userForm.getNickname());
-            userEntity.setEmail(userForm.getEmail());
-            userEntity.setPassword(userForm.getPassword());
+        userEntity.setNickname(userForm.getNickname());
+        userEntity.setEmail(userForm.getEmail());
+        userEntity.setPassword(userForm.getPassword());
 
-            userService.registerNewUser(userEntity);
-        } catch (Exception e) {
-            model.addAttribute("errorMessage",e.getMessage());
-            return "users/register";
-        }
+        userService.registerNewUser(userEntity);
         return "redirect:/";
     }
 
@@ -72,13 +70,8 @@ public class UserController {
     @GetMapping("/users/{userId}")
     public String userProfile(@PathVariable("userId") Integer userId, Model model) {
         UserEntity user;
-        try {
-            user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("Useer not found: " + userId));
-        } catch (EntityNotFoundException ex) {
-            model.addAttribute("errorMessage", ex.getMessage());
-            return "error";
-        }
+        user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("ユーザが見つかりませんでした。"));
         model.addAttribute("user", user);
         return "users/detail";
     }
