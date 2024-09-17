@@ -19,17 +19,17 @@
             <form th:action="@{/register}" th:method="post" th:object="${user}", class="new_user">
                 <div class="field">
                     <label for="nickname">ニックネーム <em>(6文字以内)</em></label><br />
-                    <input type="text" id="nickname" name="nickname" autofocus="autofocus" />
+                    <input type="text" id="nickname" th:field="*{nickname}"  autofocus="autofocus" />
                 </div>
 
                 <div class="field">
                     <label for="email">メールアドレス</label><br />
-                    <input type="email" id="email" name="email" />
+                    <input type="email" id="email" th:field="*{email}"  />
                 </div>
 
                 <div class="field">
                     <label for="password">パスワード</label>
-                    <input type="password" id="password" name="password"/>
+                    <input type="password" id="password" th:field="*{password}" />
                 </div>
 
                 <div class='field'>

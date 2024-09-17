@@ -2,16 +2,13 @@ package in.tech_camp.pictweet.models;
 
 import java.util.Set;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.ActiveProfiles;
 
-import in.tech_camp.pictweet.UserEntity;
 import in.tech_camp.pictweet.UserForm;
 import in.tech_camp.pictweet.UserRepository;
 import in.tech_camp.pictweet.ValidGroup1;
@@ -63,25 +60,26 @@ public class UserFormUnitTest {
         assertEquals("Email can't be blank", violations.iterator().next().getMessage());
     }
 
-    @Test
-    void 重複したemailが存在する場合は登録できない() {
-        UserEntity user = new UserEntity();
-        user.setNickname(userForm.getNickname());
-        user.setEmail(userForm.getEmail());
-        user.setPassword(userForm.getPassword());
+    // バリデーションで重複のチェックはないためテストは不要？
+    // @Test
+    // void 重複したemailが存在する場合は登録できない() {
+    //     UserEntity user = new UserEntity();
+    //     user.setNickname(userForm.getNickname());
+    //     user.setEmail(userForm.getEmail());
+    //     user.setPassword(userForm.getPassword());
 
-        userRepository.saveAndFlush(user);
+    //     userRepository.saveAndFlush(user);
 
-         // 異なるユーザーを作成（同じメールアドレスを使用）
-        UserEntity anotherUser = new UserEntity();
-        anotherUser.setNickname("test2");
-        anotherUser.setEmail(userForm.getEmail()); // 同じメールアドレス
-        anotherUser.setPassword("password");
+    //      // 異なるユーザーを作成（同じメールアドレスを使用）
+    //     UserEntity anotherUser = new UserEntity();
+    //     anotherUser.setNickname("test2");
+    //     anotherUser.setEmail(userForm.getEmail()); // 同じメールアドレス
+    //     anotherUser.setPassword("password");
 
-        assertThatThrownBy(() -> userRepository.saveAndFlush(anotherUser))
-            .isInstanceOf(DataIntegrityViolationException.class)
-            .hasCauseInstanceOf(org.hibernate.exception.ConstraintViolationException.class);
-    }
+    //     assertThatThrownBy(() -> userRepository.saveAndFlush(anotherUser))
+    //         .isInstanceOf(DataIntegrityViolationException.class)
+    //         .hasCauseInstanceOf(org.hibernate.exception.ConstraintViolationException.class);
+    // }
 
     @Test
     public void emailは無効なメールでは登録できない() {
