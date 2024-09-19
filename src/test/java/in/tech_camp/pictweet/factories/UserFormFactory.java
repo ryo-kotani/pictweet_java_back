@@ -19,7 +19,7 @@ public class UserFormFactory {
 
     userForm.setNickname(generatedUsername);
     userForm.setPassword(faker.internet().password(6, 12));
-
+    userForm.setPasswordConfirmation(userForm.getPassword());
     return userForm;
   }
 }

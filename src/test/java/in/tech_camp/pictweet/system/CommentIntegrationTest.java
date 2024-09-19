@@ -97,7 +97,7 @@ public class CommentIntegrationTest {
               .andExpect(redirectedUrl("/tweets/" + tweetId)); // 詳細ページにリダイレクトされることを確認
 
       // コメントモデルのカウントが1増加しているか確認
-      List<CommentEntity>  comments = commentRepository.findByTweet_id(tweetId); // コメントのカウントを取得するメソッドが必要
+      List<CommentEntity>  comments = commentRepository.findByTweet(tweets.get(0)); // コメントのカウントを取得するメソッドが必要
       Integer commentCount = comments.size();
       assertEquals(1, commentCount); // 初回なのでカウントは1
 

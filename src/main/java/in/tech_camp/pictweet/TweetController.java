@@ -1,5 +1,6 @@
 package in.tech_camp.pictweet;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 
 @Controller
@@ -22,8 +24,6 @@ public class TweetController {
     private final TweetRepository tweetRepository;
     private final UserRepository userRepository;
     private final CommentRepository commentRepository;
-
-
 
     @GetMapping("/tweets/search")
     public String searchTweets(Model model, @ModelAttribute("searchForm") SearchForm form) {
@@ -36,8 +36,8 @@ public class TweetController {
 
     @GetMapping("/tweets/new")
     public String showTweetNew(Model model){
-    model.addAttribute("tweetForm", new TweetForm()); // "tweet"としてモデル属性を追加
-    return "tweets/new";
+        model.addAttribute("tweetForm", new TweetForm());
+        return "tweets/new";
     }
 
     @PostMapping("/tweets")
@@ -46,31 +46,40 @@ public class TweetController {
                         Authentication authentication,
                         Model model) {
 
-        String email = authentication.getName();
-        UserEntity user = userRepository.findByEmail(email);
+        UserEntity user;
+        try {
+            user = userRepository.findByEmail(authentication.getName()).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        } catch (EntityNotFoundException ex) {
+            return "redirect:/";
+        }
 
         if (result.hasErrors()) {
             List<String> errorMessages = result.getAllErrors().stream()
                     .map(DefaultMessageSourceResolvable::getDefaultMessage)
                     .collect(Collectors.toList());
+            model.addAttribute("tweetForm", tweetForm);
             model.addAttribute("errorMessages", errorMessages);
-            return showTweetNew(model);
+            return "tweets/new";
         }
 
-        TweetEntity tweetEntity = new TweetEntity();
-        tweetEntity.setUser(user);
-        tweetEntity.setText(tweetForm.getText());
-        tweetEntity.setImage(tweetForm.getImage());
+        TweetEntity tweet = new TweetEntity();
+        tweet.setUser(user);
+        tweet.setText(tweetForm.getText());
+        tweet.setImage(tweetForm.getImage());
 
-        tweetRepository.save(tweetEntity);
+        try {
+            tweetRepository.save(tweet);
+        } catch (Exception e) {
+            return "redirect:/";
+        }
         return "redirect:/";
     }
 
     @GetMapping
     public String showTweets(Model model, @ModelAttribute SearchForm form) {
 
-        List<TweetEntity> tweetList = tweetRepository.findAll();
-        model.addAttribute("tweetList", tweetList);
+        List<TweetEntity> tweets = tweetRepository.findAll();
+        model.addAttribute("tweetList", tweets);
         model.addAttribute("form", form);
         return "tweets/index";
     }
@@ -80,12 +89,16 @@ public class TweetController {
     public String showTweetDetail(@PathVariable("tweetId") Integer tweetId,
                             @ModelAttribute("commentForm") CommentForm commentForm,
                             Model model) {
-        TweetEntity tweet;
-        tweet = tweetRepository.findById(tweetId)
-        .orElseThrow(() -> new RuntimeException("Tweetが見つかりませんでした。"));
+        TweetEntity tweet = null;
+        List<CommentEntity> comments = new ArrayList<>();
 
-
-        List<CommentEntity> comments = commentRepository.findByTweet_id(tweetId);
+        try {
+            tweet = tweetRepository.findById(tweetId).orElseThrow(() -> new EntityNotFoundException("Tweet not found: " + tweetId));
+            comments = commentRepository.findByTweet(tweet);
+        } catch (EntityNotFoundException ex) {
+            model.addAttribute("errorMessage", ex.getMessage());
+            return "redirect:/";
+        }
         model.addAttribute("commentForm",commentForm);
         model.addAttribute("comments",comments);
         model.addAttribute("tweet", tweet);
@@ -96,16 +109,18 @@ public class TweetController {
     @GetMapping("/tweets/{tweetId}/edit")
     public String edit(Authentication authentication,@PathVariable("tweetId") Integer tweetId, Model model) {
         TweetEntity tweet;
-        tweet = tweetRepository.findById(tweetId)
-            .orElseThrow(() -> new RuntimeException("Tweetが見つかりませんでした。"));
-
+        try {
+            tweet = tweetRepository.findById(tweetId)
+                    .orElseThrow(() -> new EntityNotFoundException("Tweet not found: " + tweetId));
+        } catch (EntityNotFoundException ex) {
+            model.addAttribute("errorMessage", ex.getMessage());
+            return "redirect:/";
+        }
         // 現在のユーザーがツイートの所有者であるかを確認
         if (!tweet.getUser().getEmail().equals(authentication.getName())) {
-            return "redirect:/"; // トップページへリダイレクト
+            return "redirect:/";
         }
-
         model.addAttribute("tweetEntity", tweet);
-
         return "tweets/edit";
     }
 
@@ -116,21 +131,20 @@ public class TweetController {
                     BindingResult result,
                     @PathVariable("tweetId") Integer tweetId,
                     Model model) {
-        // 認証ユーザ情報を取得
-        String email = authentication.getName();
-        UserEntity user = userRepository.findByEmail(email);
-
         TweetEntity tweet;
-        tweet = tweetRepository.findById(tweetId)
-            .orElseThrow(() -> new RuntimeException("Tweetが見つかりませんでした。"));
+        UserEntity user;
 
-        user = userRepository.findById(user.getId())
-            .orElseThrow(() -> new RuntimeException("Userが見つかりませんでした。"));
-
+        try {
+            tweet = tweetRepository.findById(tweetId).orElseThrow(() -> new EntityNotFoundException("Tweet not found: " + tweetId));
+            user = userRepository.findByEmail(authentication.getName()).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        } catch (EntityNotFoundException ex) {
+            model.addAttribute("errorMessage", ex.getMessage());
+            return "redirect:/";
+        }
         // ユーザ認証チェック
-        if (!user.getEmail().equals(email)) {
+        if (!tweet.getUser().getEmail().equals(authentication.getName())) {
             model.addAttribute("errorMessage", "tweetの投稿者と一致しません。");
-            return "/";
+            return "redirect:/";
         }
         // バリデーションエラーチェック
         if (result.hasErrors()) {
@@ -139,13 +153,17 @@ public class TweetController {
                     .collect(Collectors.toList());
             model.addAttribute("errorMessages", errorMessages);
             model.addAttribute("tweetEntity", tweet);
-            return edit(authentication,tweetId, model);
+            return "tweets/edit";
         }
         // tweetForm からエンティティに値を設定
         tweet.setText(tweetForm.getText());
         tweet.setImage(tweetForm.getImage());
 
-        tweetRepository.save(tweet);
+        try {
+            tweetRepository.save(tweet);
+        } catch (Exception e) {
+            return "redirect:/";
+        }
 
         return "redirect:/";
     }
@@ -153,8 +171,18 @@ public class TweetController {
     @PostMapping("/tweets/{tweetId}/delete")
     public String delete(Authentication authentication,
                     @PathVariable("tweetId") Integer tweetId) {
+        try {
+            tweetRepository.findById(tweetId).orElseThrow(() -> new EntityNotFoundException("Tweet not found: " + tweetId));
+            userRepository.findByEmail(authentication.getName()).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        } catch (EntityNotFoundException ex) {
+            return "redirect:/";
+        }
 
-        tweetRepository.deleteById(tweetId);
+        try {
+            tweetRepository.deleteById(tweetId);
+        } catch (Exception e) {
+            return "redirect:/";
+        }
         return "redirect:/";
     }
 }

@@ -52,7 +52,7 @@ public class TweetControllerShowTest {
 
         List<CommentEntity> expectedComments = new ArrayList<>();
         when(tweetRepository.findById(anyInt())).thenReturn(Optional.of(tweet));
-        when(commentRepository.findByTweet_id(anyInt())).thenReturn(expectedComments);
+        when(commentRepository.findByTweet(tweet)).thenReturn(expectedComments);
 
         String result = tweetController.showTweetDetail(1, new CommentForm(), model);
         assertThat(result, is("tweets/detail"));
@@ -67,7 +67,7 @@ public class TweetControllerShowTest {
 
         List<CommentEntity> expectedComments = new ArrayList<>();
         when(tweetRepository.findById(anyInt())).thenReturn(Optional.of(tweet));
-        when(commentRepository.findByTweet_id(anyInt())).thenReturn(expectedComments);
+        when(commentRepository.findByTweet(tweet)).thenReturn(expectedComments);
 
         tweetController.showTweetDetail(1, new CommentForm(), model);
 
@@ -84,7 +84,7 @@ public class TweetControllerShowTest {
 
         List<CommentEntity> expectedComments = new ArrayList<>();
         when(tweetRepository.findById(anyInt())).thenReturn(Optional.of(tweet));
-        when(commentRepository.findByTweet_id(anyInt())).thenReturn(expectedComments);
+        when(commentRepository.findByTweet(tweet)).thenReturn(expectedComments);
 
         tweetController.showTweetDetail(1, new CommentForm(), model);
 
@@ -106,7 +106,7 @@ public class TweetControllerShowTest {
         expectedComments.add(comment1);
 
         when(tweetRepository.findById(anyInt())).thenReturn(Optional.of(tweet));
-        when(commentRepository.findByTweet_id(anyInt())).thenReturn(expectedComments);
+        when(commentRepository.findByTweet(tweet)).thenReturn(expectedComments);
 
         tweetController.showTweetDetail(1, new CommentForm(), model);
 

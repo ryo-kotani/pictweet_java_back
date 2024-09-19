@@ -29,17 +29,20 @@ public class CommentController {
                               @PathVariable("tweetId") Integer tweetId,
                               Model model)
     {
-        String email = authentication.getName();
-        UserEntity user = userRepository.findByEmail(email);
-        TweetEntity tweet;
-        tweet = tweetRepository.findById(tweetId)
-                    .orElseThrow(() -> new EntityNotFoundException("ツイートが見つかりませんでした。"));
-
+        TweetEntity tweet = null;
+        UserEntity user = null;
+        try {
+            tweet = tweetRepository.findById(tweetId).orElseThrow(() -> new EntityNotFoundException("Tweet not found: " + tweetId));
+            user = userRepository.findByEmail(authentication.getName()).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        } catch (EntityNotFoundException ex) {
+            model.addAttribute("errorMessage", ex.getMessage());
+            return "/";
+        }
         // バリデーションエラーがあるかチェックする
         if (result.hasErrors()) {
             model.addAttribute("errorMessages", result.getAllErrors());
             model.addAttribute("tweet", tweet);
-            model.addAttribute("comments", commentRepository.findByTweet_id(tweetId));
+            model.addAttribute("comments", commentRepository.findByTweet(tweet));
             model.addAttribute("commentForm", commentForm);
             return "tweets/detail";
         }
@@ -49,8 +52,15 @@ public class CommentController {
         comment.setText(commentForm.getText());
         comment.setTweet(tweet);
         comment.setUser(user);
-        commentRepository.save(comment);
 
+        try {
+            commentRepository.save(comment);
+        } catch (Exception e) {
+            model.addAttribute("tweet", tweet);
+            model.addAttribute("comments", commentRepository.findByTweet(tweet));
+            model.addAttribute("commentForm", commentForm);
+            return "tweets/detail";
+        }
         // 成功時には詳細画面にリダイレクトする
         return "redirect:/tweets/" + tweetId;
     }
