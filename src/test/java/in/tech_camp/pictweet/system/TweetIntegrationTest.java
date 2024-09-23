@@ -14,8 +14,6 @@ import org.springframework.mock.web.MockHttpSession;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -171,7 +169,7 @@ public class TweetIntegrationTest {
         Integer tweetId = tweet.getId();
 
         mockMvc.perform(get("/tweets/{tweetId}/edit", tweetId)
-                .session((MockHttpSession) session)) //ここでエラー
+                .session((MockHttpSession) session))
                 .andExpect(redirectedUrl("/")); // アクセス拒否が期待される
 
         // リダイレクトを確認

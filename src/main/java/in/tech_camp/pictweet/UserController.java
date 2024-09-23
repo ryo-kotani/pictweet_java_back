@@ -31,9 +31,7 @@ public class UserController {
 
     @PostMapping("/register")
     public String registerNewUser(@ModelAttribute("user") @Validated(GroupOrder.class) UserForm userForm, BindingResult result, Model model) {
-        if (!userForm.getPassword().equals(userForm.getPasswordConfirmation())) {
-            result.rejectValue("passwordConfirmation", "error.user", "Password confirmation doesn't match Password");
-        }
+        userForm.validatePasswords(result);
         if (userRepository.existsByEmail(userForm.getEmail())) {
             result.rejectValue("email", "error.user", "Email already exists");
         }

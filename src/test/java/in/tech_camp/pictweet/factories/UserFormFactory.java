@@ -9,6 +9,7 @@ public class UserFormFactory {
 
   public static UserForm createUser() {
     UserForm userForm = new UserForm();
+
     userForm.setEmail(faker.internet().emailAddress());
     String generatedUsername = faker.name().username();
 

@@ -1,11 +1,11 @@
 package in.tech_camp.pictweet;
 
 import org.hibernate.validator.constraints.Length;
+import org.springframework.validation.BindingResult;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-
 import lombok.Data;
 
 @Data
@@ -23,6 +23,11 @@ public class UserForm {
     @Length(min = 6, max = 128, message = "Password should be between 6 and 128 characters",groups = ValidGroup2.class)
     private String password;
 
-    @NotBlank(message = "Password confirmation can't be blank",groups = ValidGroup1.class)
     private String passwordConfirmation;
+
+    public void validatePasswords(BindingResult result) {
+        if (!password.equals(passwordConfirmation)) {
+            result.rejectValue("passwordConfirmation", "error.user", "Password confirmation doesn't match Password");
+        }
+    }
 }

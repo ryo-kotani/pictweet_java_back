@@ -34,6 +34,12 @@ public class TweetFormUnitTest {
     }
 
     @Test
+    public void テキストと画像が存在していれば保存できる () {
+       Set<ConstraintViolation<TweetForm>> violations = validator.validate(tweetForm, ValidGroup1.class);
+        assertEquals(0, violations.size());
+    }
+
+    @Test
     public void テキストが空では投稿できない() {
         tweetForm.setText("");
 

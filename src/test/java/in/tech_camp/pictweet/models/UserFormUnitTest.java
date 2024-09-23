@@ -5,9 +5,12 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import static org.mockito.Mockito.verify;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.validation.BindingResult;
 
 import in.tech_camp.pictweet.UserForm;
 import in.tech_camp.pictweet.UserRepository;
@@ -24,6 +27,7 @@ import jakarta.validation.ValidatorFactory;
 public class UserFormUnitTest {
     private UserForm userForm;
     private Validator validator;
+    private BindingResult bindingResult;
 
     @Autowired
     private UserRepository userRepository;
@@ -34,6 +38,12 @@ public class UserFormUnitTest {
         validator = factory.getValidator();
 
         userForm = UserFormFactory.createUser();
+    }
+
+    @Test
+    public void nicknameとemailとpasswordとpasswordconfirmationが存在すれば登録できる () {
+        Set<ConstraintViolation<UserForm>> violations = validator.validate(userForm, ValidGroup1.class);
+        assertEquals(0, violations.size());
     }
 
     @Test
@@ -59,27 +69,6 @@ public class UserFormUnitTest {
         assertEquals(1, violations.size());
         assertEquals("Email can't be blank", violations.iterator().next().getMessage());
     }
-
-    // バリデーションで重複のチェックはないためテストは不要？
-    // @Test
-    // void 重複したemailが存在する場合は登録できない() {
-    //     UserEntity user = new UserEntity();
-    //     user.setNickname(userForm.getNickname());
-    //     user.setEmail(userForm.getEmail());
-    //     user.setPassword(userForm.getPassword());
-
-    //     userRepository.saveAndFlush(user);
-
-    //      // 異なるユーザーを作成（同じメールアドレスを使用）
-    //     UserEntity anotherUser = new UserEntity();
-    //     anotherUser.setNickname("test2");
-    //     anotherUser.setEmail(userForm.getEmail()); // 同じメールアドレス
-    //     anotherUser.setPassword("password");
-
-    //     assertThatThrownBy(() -> userRepository.saveAndFlush(anotherUser))
-    //         .isInstanceOf(DataIntegrityViolationException.class)
-    //         .hasCauseInstanceOf(org.hibernate.exception.ConstraintViolationException.class);
-    // }
 
     @Test
     public void emailは無効なメールでは登録できない() {
@@ -116,5 +105,19 @@ public class UserFormUnitTest {
         violations.forEach(violation -> System.out.println(violation.getMessage()));
         assertEquals(1, violations.size());
         assertEquals("Password should be between 6 and 128 characters", violations.iterator().next().getMessage());
+    }
+
+    @Test
+    public void passwordとpasswordConfirmationが一致すれば登録できる() {
+        userForm.validatePasswords(bindingResult);
+        verify(bindingResult, Mockito.never()).rejectValue(Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
+    }
+
+    @Test
+    public void passwordとpasswordConfirmationが不一致では登録できない() {
+        userForm.setPasswordConfirmation("differentPassword");
+        userForm.validatePasswords(bindingResult);
+
+        verify(bindingResult).rejectValue("passwordConfirmation", "error.user", "Password confirmation doesn't match Password");
     }
 }
