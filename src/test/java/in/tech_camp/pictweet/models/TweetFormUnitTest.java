@@ -3,6 +3,7 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -32,28 +33,32 @@ public class TweetFormUnitTest {
 
         tweetForm = TweetFormFactory.createTweet();
     }
-
-    @Test
-    public void テキストと画像が存在していれば保存できる () {
-       Set<ConstraintViolation<TweetForm>> violations = validator.validate(tweetForm, ValidGroup1.class);
-        assertEquals(0, violations.size());
-    }
-
-    @Test
-    public void テキストが空では投稿できない() {
-        tweetForm.setText("");
-
+    @Nested
+    class ツイート投稿ができる場合 {
+        @Test
+        public void テキストと画像が存在していれば保存できる () {
         Set<ConstraintViolation<TweetForm>> violations = validator.validate(tweetForm, ValidGroup1.class);
-        assertEquals(1, violations.size());
-        assertEquals("Text can't be blank", violations.iterator().next().getMessage());
+            assertEquals(0, violations.size());
+        }
     }
+    @Nested
+    class ツイート投稿ができない場合 {
+        @Test
+        public void テキストが空では投稿できない() {
+            tweetForm.setText("");
 
-    @Test
-    public void 画像が空では投稿できない() {
-        tweetForm.setImage("");
+            Set<ConstraintViolation<TweetForm>> violations = validator.validate(tweetForm, ValidGroup1.class);
+            assertEquals(1, violations.size());
+            assertEquals("Text can't be blank", violations.iterator().next().getMessage());
+        }
 
-        Set<ConstraintViolation<TweetForm>> violations = validator.validate(tweetForm, ValidGroup1.class);
-        assertEquals(1, violations.size());
-        assertEquals("Image can't be blank", violations.iterator().next().getMessage());
+        @Test
+        public void 画像が空では投稿できない() {
+            tweetForm.setImage("");
+
+            Set<ConstraintViolation<TweetForm>> violations = validator.validate(tweetForm, ValidGroup1.class);
+            assertEquals(1, violations.size());
+            assertEquals("Image can't be blank", violations.iterator().next().getMessage());
+        }
     }
 }
