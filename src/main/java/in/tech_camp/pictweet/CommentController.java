@@ -1,6 +1,6 @@
 package in.tech_camp.pictweet;
 
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 
 @Controller
@@ -25,19 +24,17 @@ public class CommentController {
     @PostMapping("/{tweetId}/comment")
     public String postComment(@ModelAttribute("commentForm") @Validated(GroupOrder.class) CommentForm commentForm,
                               BindingResult result,
-                              Authentication authentication,
+                              @AuthenticationPrincipal CustomUserDetail currentUser,
                               @PathVariable("tweetId") Integer tweetId,
                               Model model)
     {
-        TweetEntity tweet = null;
-        UserEntity user = null;
-        try {
-            tweet = tweetRepository.findById(tweetId).orElseThrow(() -> new EntityNotFoundException("Tweet not found: " + tweetId));
-            user = userRepository.findByEmail(authentication.getName()).orElseThrow(() -> new EntityNotFoundException("User not found"));
-        } catch (EntityNotFoundException ex) {
-            model.addAttribute("errorMessage", ex.getMessage());
+        TweetEntity tweet = tweetRepository.findById(tweetId).orElse(null);
+        UserEntity user = userRepository.findById(currentUser.getId()).orElse(null);
+
+        if (user != null || tweet != null) {
             return "/";
         }
+
         // バリデーションエラーがあるかチェックする
         if (result.hasErrors()) {
             model.addAttribute("errorMessages", result.getAllErrors());

@@ -1,11 +1,10 @@
 package in.tech_camp.pictweet;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.context.support.DefaultMessageSourceResolvable;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 
 @Controller
@@ -43,13 +41,11 @@ public class TweetController {
     @PostMapping("/tweets")
     public String createTweet(@ModelAttribute("tweetForm") @Validated(GroupOrder.class) TweetForm tweetForm,
                         BindingResult result,
-                        Authentication authentication,
+                        @AuthenticationPrincipal CustomUserDetail currentUser,
                         Model model) {
 
-        UserEntity user;
-        try {
-            user = userRepository.findByEmail(authentication.getName()).orElseThrow(() -> new EntityNotFoundException("User not found"));
-        } catch (EntityNotFoundException ex) {
+        UserEntity user = userRepository.findById(currentUser.getId()).orElse(null);
+        if (user != null) {
             return "redirect:/";
         }
 
@@ -89,16 +85,13 @@ public class TweetController {
     public String showTweetDetail(@PathVariable("tweetId") Integer tweetId,
                             @ModelAttribute("commentForm") CommentForm commentForm,
                             Model model) {
-        TweetEntity tweet = null;
-        List<CommentEntity> comments = new ArrayList<>();
 
-        try {
-            tweet = tweetRepository.findById(tweetId).orElseThrow(() -> new EntityNotFoundException("Tweet not found: " + tweetId));
-            comments = commentRepository.findByTweet(tweet);
-        } catch (EntityNotFoundException ex) {
-            model.addAttribute("errorMessage", ex.getMessage());
+
+        TweetEntity tweet = tweetRepository.findById(tweetId).orElse(null);
+        if (tweet != null) {
             return "redirect:/";
         }
+        List<CommentEntity> comments = commentRepository.findByTweet(tweet);
         model.addAttribute("commentForm",commentForm);
         model.addAttribute("comments",comments);
         model.addAttribute("tweet", tweet);
@@ -107,17 +100,13 @@ public class TweetController {
     }
 
     @GetMapping("/tweets/{tweetId}/edit")
-    public String edit(Authentication authentication,@PathVariable("tweetId") Integer tweetId, Model model) {
-        TweetEntity tweet;
-        try {
-            tweet = tweetRepository.findById(tweetId)
-                    .orElseThrow(() -> new EntityNotFoundException("Tweet not found: " + tweetId));
-        } catch (EntityNotFoundException ex) {
-            model.addAttribute("errorMessage", ex.getMessage());
+    public String edit(@AuthenticationPrincipal CustomUserDetail currentUser,@PathVariable("tweetId") Integer tweetId, Model model) {
+        TweetEntity tweet = tweetRepository.findById(tweetId).orElse(null);
+        if (tweet != null) {
             return "redirect:/";
         }
         // 現在のユーザーがツイートの所有者であるかを確認
-        if (!tweet.getUser().getEmail().equals(authentication.getName())) {
+        if (!tweet.getUser().getEmail().equals(currentUser.getUsername())) {
             return "redirect:/";
         }
         model.addAttribute("tweetEntity", tweet);
@@ -126,24 +115,19 @@ public class TweetController {
 
 
     @PostMapping("/tweets/{tweetId}/update")
-    public String update(Authentication authentication,
+    public String update(@AuthenticationPrincipal CustomUserDetail currentUser,
                     @ModelAttribute("tweetForm") @Validated(GroupOrder.class) TweetForm tweetForm,
                     BindingResult result,
                     @PathVariable("tweetId") Integer tweetId,
                     Model model) {
-        TweetEntity tweet;
-        UserEntity user;
+        TweetEntity tweet = tweetRepository.findById(tweetId).orElse(null);
+        UserEntity user = userRepository.findById(currentUser.getId()).orElse(null);
 
-        try {
-            tweet = tweetRepository.findById(tweetId).orElseThrow(() -> new EntityNotFoundException("Tweet not found: " + tweetId));
-            user = userRepository.findByEmail(authentication.getName()).orElseThrow(() -> new EntityNotFoundException("User not found"));
-        } catch (EntityNotFoundException ex) {
-            model.addAttribute("errorMessage", ex.getMessage());
+        if (tweet != null || user != null){
             return "redirect:/";
         }
         // ユーザ認証チェック
-        if (!tweet.getUser().getEmail().equals(authentication.getName())) {
-            model.addAttribute("errorMessage", "tweetの投稿者と一致しません。");
+        if (!tweet.getUser().getEmail().equals(currentUser.getUsername())) {
             return "redirect:/";
         }
         // バリデーションエラーチェック
@@ -169,12 +153,17 @@ public class TweetController {
     }
 
     @PostMapping("/tweets/{tweetId}/delete")
-    public String delete(Authentication authentication,
+    public String delete(@AuthenticationPrincipal CustomUserDetail currentUser,
                     @PathVariable("tweetId") Integer tweetId) {
-        try {
-            tweetRepository.findById(tweetId).orElseThrow(() -> new EntityNotFoundException("Tweet not found: " + tweetId));
-            userRepository.findByEmail(authentication.getName()).orElseThrow(() -> new EntityNotFoundException("User not found"));
-        } catch (EntityNotFoundException ex) {
+
+        TweetEntity tweet = tweetRepository.findById(tweetId).orElse(null);
+        UserEntity user = userRepository.findById(currentUser.getId()).orElse(null);
+
+        if (tweet != null || user != null){
+            return "redirect:/";
+        }
+        // ユーザ認証チェック
+        if (!tweet.getUser().getEmail().equals(currentUser.getUsername())) {
             return "redirect:/";
         }
 

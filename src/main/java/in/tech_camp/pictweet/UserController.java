@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 
 @Controller
@@ -73,9 +72,10 @@ public class UserController {
 
     @GetMapping("/users/{userId}")
     public String userProfile(@PathVariable("userId") Integer userId, Model model) {
-        UserEntity user;
-        user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("ユーザが見つかりませんでした。"));
+        UserEntity user = userRepository.findById(userId).orElse(null);
+        if (user != null) {
+            return "redirect:/";
+        }
         model.addAttribute("user", user);
         return "users/detail";
     }
