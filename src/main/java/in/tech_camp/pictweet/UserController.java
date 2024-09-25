@@ -72,7 +72,7 @@ public class UserController {
 
     @GetMapping("/users/{userId}")
     public String userProfile(@PathVariable("userId") Integer userId, Model model) {
-        UserEntity user = userRepository.findById(userId).orElse(null);
+        UserEntity user = userRepository.findById(userId);
         if (user != null) {
             return "redirect:/";
         }

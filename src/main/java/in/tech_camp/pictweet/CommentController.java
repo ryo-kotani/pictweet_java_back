@@ -28,8 +28,8 @@ public class CommentController {
                               @PathVariable("tweetId") Integer tweetId,
                               Model model)
     {
-        TweetEntity tweet = tweetRepository.findById(tweetId).orElse(null);
-        UserEntity user = userRepository.findById(currentUser.getId()).orElse(null);
+        TweetEntity tweet = tweetRepository.findById(tweetId);
+        UserEntity user = userRepository.findById(currentUser.getId());
 
         if (user != null || tweet != null) {
             return "/";
@@ -39,7 +39,7 @@ public class CommentController {
         if (result.hasErrors()) {
             model.addAttribute("errorMessages", result.getAllErrors());
             model.addAttribute("tweet", tweet);
-            model.addAttribute("comments", commentRepository.findByTweet(tweet));
+            model.addAttribute("comments", commentRepository.findByTweetId(tweet.getId()));
             model.addAttribute("commentForm", commentForm);
             return "tweets/detail";
         }
@@ -51,10 +51,10 @@ public class CommentController {
         comment.setUser(user);
 
         try {
-            commentRepository.save(comment);
+            commentRepository.insert(comment);
         } catch (Exception e) {
             model.addAttribute("tweet", tweet);
-            model.addAttribute("comments", commentRepository.findByTweet(tweet));
+            model.addAttribute("comments", commentRepository.findByTweetId(tweet.getId()));
             model.addAttribute("commentForm", commentForm);
             return "tweets/detail";
         }

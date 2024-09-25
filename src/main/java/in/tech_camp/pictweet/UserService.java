@@ -20,7 +20,7 @@ public class UserService {
         String encodedPassword = passwordEncoder.encode(password);
 
         userEntity.setPassword(encodedPassword); // 既存のuserEntityにパスワードを設定
-        userRepository.save(userEntity); // 既存のuserEntityを保存
+        userRepository.insert(userEntity); // 既存のuserEntityを保存
     }
 
 

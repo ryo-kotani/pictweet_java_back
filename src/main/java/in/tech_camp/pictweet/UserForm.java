@@ -3,7 +3,6 @@ package in.tech_camp.pictweet;
 import org.hibernate.validator.constraints.Length;
 import org.springframework.validation.BindingResult;
 
-import jakarta.persistence.Column;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
@@ -16,7 +15,6 @@ public class UserForm {
 
     @NotBlank(message = "Email can't be blank",groups = ValidGroup1.class)
     @Email(message = "Email should be valid", groups = ValidGroup2.class)
-    @Column(unique = true)
     private String email;
 
     @NotBlank(message = "Password can't be blank",groups = ValidGroup1.class)

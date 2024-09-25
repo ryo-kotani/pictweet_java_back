@@ -44,7 +44,7 @@ public class TweetController {
                         @AuthenticationPrincipal CustomUserDetail currentUser,
                         Model model) {
 
-        UserEntity user = userRepository.findById(currentUser.getId()).orElse(null);
+        UserEntity user = userRepository.findById(currentUser.getId());
         if (user != null) {
             return "redirect:/";
         }
@@ -64,7 +64,7 @@ public class TweetController {
         tweet.setImage(tweetForm.getImage());
 
         try {
-            tweetRepository.save(tweet);
+            tweetRepository.insert(tweet);
         } catch (Exception e) {
             return "redirect:/";
         }
@@ -87,11 +87,11 @@ public class TweetController {
                             Model model) {
 
 
-        TweetEntity tweet = tweetRepository.findById(tweetId).orElse(null);
+        TweetEntity tweet = tweetRepository.findById(tweetId);
         if (tweet != null) {
             return "redirect:/";
         }
-        List<CommentEntity> comments = commentRepository.findByTweet(tweet);
+        List<CommentEntity> comments = commentRepository.findByTweetId(tweet.getId());
         model.addAttribute("commentForm",commentForm);
         model.addAttribute("comments",comments);
         model.addAttribute("tweet", tweet);
@@ -101,7 +101,7 @@ public class TweetController {
 
     @GetMapping("/tweets/{tweetId}/edit")
     public String edit(@AuthenticationPrincipal CustomUserDetail currentUser,@PathVariable("tweetId") Integer tweetId, Model model) {
-        TweetEntity tweet = tweetRepository.findById(tweetId).orElse(null);
+        TweetEntity tweet = tweetRepository.findById(tweetId);
         if (tweet != null) {
             return "redirect:/";
         }
@@ -120,8 +120,8 @@ public class TweetController {
                     BindingResult result,
                     @PathVariable("tweetId") Integer tweetId,
                     Model model) {
-        TweetEntity tweet = tweetRepository.findById(tweetId).orElse(null);
-        UserEntity user = userRepository.findById(currentUser.getId()).orElse(null);
+        TweetEntity tweet = tweetRepository.findById(tweetId);
+        UserEntity user = userRepository.findById(currentUser.getId());
 
         if (tweet != null || user != null){
             return "redirect:/";
@@ -144,7 +144,7 @@ public class TweetController {
         tweet.setImage(tweetForm.getImage());
 
         try {
-            tweetRepository.save(tweet);
+            tweetRepository.update(tweet);
         } catch (Exception e) {
             return "redirect:/";
         }
@@ -156,8 +156,8 @@ public class TweetController {
     public String delete(@AuthenticationPrincipal CustomUserDetail currentUser,
                     @PathVariable("tweetId") Integer tweetId) {
 
-        TweetEntity tweet = tweetRepository.findById(tweetId).orElse(null);
-        UserEntity user = userRepository.findById(currentUser.getId()).orElse(null);
+        TweetEntity tweet = tweetRepository.findById(tweetId);
+        UserEntity user = userRepository.findById(currentUser.getId());
 
         if (tweet != null || user != null){
             return "redirect:/";
