@@ -31,15 +31,6 @@ public interface TweetRepository {
     })
     List<TweetEntity> findByTextContaining(String text);
 
-    // @Select("SELECT t.*, u.* FROM tweets t LEFT JOIN users u ON t.user_id = u.id WHERE t.user_id = #{id}")
-    // @Results(value = {
-    //     @Result(property = "id", column = "t.id"),
-    //     @Result(property = "text", column = "t.text"),
-    //     @Result(property = "user.id", column = "u.id"),
-    //     @Result(property = "user.nickname", column = "u.nickname"),
-    //     @Result(property = "user.email", column = "u.email")
-    // })
-    // List<TweetEntity> findByUserId(Integer id);
     @Select("SELECT * FROM tweets WHERE user_id = #{id}")
     @Results(value = {
         @Result(property = "user", column = "user_id",
