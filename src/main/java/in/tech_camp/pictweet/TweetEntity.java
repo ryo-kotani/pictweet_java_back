@@ -1,4 +1,5 @@
 package in.tech_camp.pictweet;
+import java.util.ArrayList;
 import java.util.List;
 
 import lombok.Data;
@@ -13,5 +14,5 @@ public class TweetEntity {
     private String image;
 
     private UserEntity user;            // ユーザーのプロパティ
-    private List<CommentEntity> comments; // コメントのプロパティ
+    private List<CommentEntity> comments = new ArrayList<>();
 }

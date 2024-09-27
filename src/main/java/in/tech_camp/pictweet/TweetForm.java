@@ -8,6 +8,6 @@ public class TweetForm {
     @NotBlank(message = "Text can't be blank", groups = ValidGroup1.class)
     private String text;
 
-    @NotBlank(message = "Image can't be blank", groups = ValidGroup1.class)
+    // @NotBlank(message = "Image can't be blank", groups = ValidGroup1.class)
     private String image;
 }

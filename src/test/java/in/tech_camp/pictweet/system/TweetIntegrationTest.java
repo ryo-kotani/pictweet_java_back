@@ -117,7 +117,7 @@ public class TweetIntegrationTest {
                 .andExpect(redirectedUrl("/"));
 
 
-        List<TweetEntity> tweets = tweetRepository.findByUser(userEntity);
+        List<TweetEntity> tweets = tweetRepository.findByUserId(userEntity.getId());
 
         // 編集リンクの確認
         mockMvc.perform(get("/").session((MockHttpSession) session)) // トップページに移動
@@ -161,7 +161,7 @@ public class TweetIntegrationTest {
         tweet.setUser(anotherUser);
         tweet.setImage(tweetForm.getImage());
         tweet.setText(tweetForm.getText());
-        tweetRepository.save(tweet);
+        tweetRepository.insert(tweet);
 
         // 他のユーザーが投稿したツイートの編集画面へ遷移しようとする
         HttpSession session = LoginSupport.login(mockMvc, userForm);
@@ -210,7 +210,7 @@ public class TweetIntegrationTest {
 
 
 
-      List<TweetEntity> tweets = tweetRepository.findByUser(userEntity);
+      List<TweetEntity> tweets = tweetRepository.findByUserId(userEntity.getId());
 
       // ツイートを削除
       List<TweetEntity> tweetsBeforeDeletion = tweetRepository.findAll();
@@ -248,7 +248,8 @@ public class TweetIntegrationTest {
       TweetEntity tweet = new TweetEntity();
       tweet.setUser(anotherUser);
       tweet.setText(tweetText);
-      tweetRepository.save(tweet);
+//       tweet.setImage("hogehoge");
+      tweetRepository.insert(tweet);
 
       // ツイートを投稿したユーザーでログイン
       HttpSession session = LoginSupport.login(mockMvc, userForm);
@@ -281,7 +282,7 @@ public class TweetIntegrationTest {
               .andExpect(redirectedUrl("/"));
 
       // 詳細ページに遷移するためのテスト
-      List<TweetEntity> tweets = tweetRepository.findByUser(userEntity); // 自分のツイートを取得
+      List<TweetEntity> tweets = tweetRepository.findByUserId(userEntity.getId()); // 自分のツイートを取得
 
       // 詳細ページに遷移
       mockMvc.perform(get("/tweets/{tweetId}", tweets.get(0).getId()) // ツイートIDで詳細ページに遷移

@@ -2,20 +2,19 @@ package in.tech_camp.pictweet.controllers;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import static org.mockito.ArgumentMatchers.anyInt;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.when;
 
 import in.tech_camp.pictweet.CommentEntity;
 import in.tech_camp.pictweet.CommentForm;
@@ -51,8 +50,8 @@ public class TweetControllerShowTest {
         tweet.setImage("image1.jpg");
 
         List<CommentEntity> expectedComments = new ArrayList<>();
-        when(tweetRepository.findById(anyInt())).thenReturn(Optional.of(tweet));
-        when(commentRepository.findByTweet(tweet)).thenReturn(expectedComments);
+        when(tweetRepository.findById(anyInt())).thenReturn(tweet);
+        when(commentRepository.findByTweetId(tweet.getId())).thenReturn(expectedComments);
 
         String result = tweetController.showTweetDetail(1, new CommentForm(), model);
         assertThat(result, is("tweets/detail"));
@@ -66,8 +65,8 @@ public class TweetControllerShowTest {
         tweet.setImage("image1.jpg");
 
         List<CommentEntity> expectedComments = new ArrayList<>();
-        when(tweetRepository.findById(anyInt())).thenReturn(Optional.of(tweet));
-        when(commentRepository.findByTweet(tweet)).thenReturn(expectedComments);
+        when(tweetRepository.findById(anyInt())).thenReturn(tweet);
+        when(commentRepository.findByTweetId(tweet.getId())).thenReturn(expectedComments);
 
         tweetController.showTweetDetail(1, new CommentForm(), model);
 
@@ -83,8 +82,8 @@ public class TweetControllerShowTest {
         tweet.setImage("image1.jpg");
 
         List<CommentEntity> expectedComments = new ArrayList<>();
-        when(tweetRepository.findById(anyInt())).thenReturn(Optional.of(tweet));
-        when(commentRepository.findByTweet(tweet)).thenReturn(expectedComments);
+        when(tweetRepository.findById(anyInt())).thenReturn(tweet);
+        when(commentRepository.findByTweetId(tweet.getId())).thenReturn(expectedComments);
 
         tweetController.showTweetDetail(1, new CommentForm(), model);
 
@@ -105,8 +104,8 @@ public class TweetControllerShowTest {
         comment1.setText("This is a comment.");
         expectedComments.add(comment1);
 
-        when(tweetRepository.findById(anyInt())).thenReturn(Optional.of(tweet));
-        when(commentRepository.findByTweet(tweet)).thenReturn(expectedComments);
+        when(tweetRepository.findById(anyInt())).thenReturn((tweet));
+        when(commentRepository.findByTweetId(tweet.getId())).thenReturn(expectedComments);
 
         tweetController.showTweetDetail(1, new CommentForm(), model);
 

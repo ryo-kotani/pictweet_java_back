@@ -36,8 +36,16 @@ public class TweetFormUnitTest {
     @Nested
     class ツイート投稿ができる場合 {
         @Test
-        public void テキストと画像が存在していれば保存できる () {
+        public void テキストと画像が存在していれば投稿できる () {
         Set<ConstraintViolation<TweetForm>> violations = validator.validate(tweetForm, ValidGroup1.class);
+            assertEquals(0, violations.size());
+        }
+
+        @Test
+        public void 画像が空でも投稿できる() {
+            tweetForm.setImage("");
+
+            Set<ConstraintViolation<TweetForm>> violations = validator.validate(tweetForm, ValidGroup1.class);
             assertEquals(0, violations.size());
         }
     }
@@ -50,15 +58,6 @@ public class TweetFormUnitTest {
             Set<ConstraintViolation<TweetForm>> violations = validator.validate(tweetForm, ValidGroup1.class);
             assertEquals(1, violations.size());
             assertEquals("Text can't be blank", violations.iterator().next().getMessage());
-        }
-
-        @Test
-        public void 画像が空では投稿できない() {
-            tweetForm.setImage("");
-
-            Set<ConstraintViolation<TweetForm>> violations = validator.validate(tweetForm, ValidGroup1.class);
-            assertEquals(1, violations.size());
-            assertEquals("Image can't be blank", violations.iterator().next().getMessage());
         }
     }
 }

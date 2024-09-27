@@ -13,7 +13,7 @@
   <p th:text="${user.nickname} + 'さんの投稿一覧'"></p>
 
   <div class="contents row">
-    <div th:each="tweet : ${user.tweets}" class="content_post" th:style="'background-image: url(' + (${tweet.image} != null ? ${tweet.image} : 'none') + ');'">
+    <div th:each="tweet : ${tweets}" class="content_post" th:style="'background-image: url(' + (${tweet.image} != null ? ${tweet.image} : 'none') + ');'">
       <div th:insert="~{tweets/tweet :: tweetList}"></div>
     </div>
   </div>

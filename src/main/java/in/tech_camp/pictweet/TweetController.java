@@ -45,7 +45,7 @@ public class TweetController {
                         Model model) {
 
         UserEntity user = userRepository.findById(currentUser.getId());
-        if (user != null) {
+        if (user == null) {
             return "redirect:/";
         }
 
@@ -74,6 +74,7 @@ public class TweetController {
     @GetMapping
     public String showTweets(Model model, @ModelAttribute SearchForm form) {
 
+
         List<TweetEntity> tweets = tweetRepository.findAll();
         model.addAttribute("tweetList", tweets);
         model.addAttribute("form", form);
@@ -88,7 +89,7 @@ public class TweetController {
 
 
         TweetEntity tweet = tweetRepository.findById(tweetId);
-        if (tweet != null) {
+        if (tweet == null) {
             return "redirect:/";
         }
         List<CommentEntity> comments = commentRepository.findByTweetId(tweet.getId());
@@ -102,7 +103,7 @@ public class TweetController {
     @GetMapping("/tweets/{tweetId}/edit")
     public String edit(@AuthenticationPrincipal CustomUserDetail currentUser,@PathVariable("tweetId") Integer tweetId, Model model) {
         TweetEntity tweet = tweetRepository.findById(tweetId);
-        if (tweet != null) {
+        if (tweet == null) {
             return "redirect:/";
         }
         // 現在のユーザーがツイートの所有者であるかを確認
@@ -123,7 +124,7 @@ public class TweetController {
         TweetEntity tweet = tweetRepository.findById(tweetId);
         UserEntity user = userRepository.findById(currentUser.getId());
 
-        if (tweet != null || user != null){
+        if (tweet == null || user == null){
             return "redirect:/";
         }
         // ユーザ認証チェック
@@ -159,7 +160,7 @@ public class TweetController {
         TweetEntity tweet = tweetRepository.findById(tweetId);
         UserEntity user = userRepository.findById(currentUser.getId());
 
-        if (tweet != null || user != null){
+        if (tweet == null || user == null){
             return "redirect:/";
         }
         // ユーザ認証チェック

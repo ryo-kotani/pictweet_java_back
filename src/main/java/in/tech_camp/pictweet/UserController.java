@@ -21,6 +21,7 @@ import lombok.AllArgsConstructor;
 public class UserController {
 
     private final UserRepository userRepository;
+    private final TweetRepository tweetRepository;
     private final UserService userService;
 
     @GetMapping("/registerForm")
@@ -73,10 +74,12 @@ public class UserController {
     @GetMapping("/users/{userId}")
     public String userProfile(@PathVariable("userId") Integer userId, Model model) {
         UserEntity user = userRepository.findById(userId);
-        if (user != null) {
+        List<TweetEntity> tweets = tweetRepository.findByUserId(user.getId());
+        if (user == null) {
             return "redirect:/";
         }
         model.addAttribute("user", user);
+        model.addAttribute("tweets", tweets);
         return "users/detail";
     }
 }

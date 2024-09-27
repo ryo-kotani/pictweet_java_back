@@ -1,5 +1,7 @@
 package in.tech_camp.pictweet;
 
+import java.util.List;
+
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -31,15 +33,16 @@ public class CommentController {
         TweetEntity tweet = tweetRepository.findById(tweetId);
         UserEntity user = userRepository.findById(currentUser.getId());
 
-        if (user != null || tweet != null) {
+        if (user == null || tweet == null) {
             return "/";
         }
 
         // バリデーションエラーがあるかチェックする
         if (result.hasErrors()) {
+            List<CommentEntity> comments= commentRepository.findByTweetId(tweet.getId());
             model.addAttribute("errorMessages", result.getAllErrors());
             model.addAttribute("tweet", tweet);
-            model.addAttribute("comments", commentRepository.findByTweetId(tweet.getId()));
+            model.addAttribute("comments", comments);
             model.addAttribute("commentForm", commentForm);
             return "tweets/detail";
         }

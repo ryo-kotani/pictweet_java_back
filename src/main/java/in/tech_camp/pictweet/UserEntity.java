@@ -1,6 +1,7 @@
 package in.tech_camp.pictweet;
 
 
+import java.util.ArrayList;
 import java.util.List;
 
 import lombok.Data;
@@ -12,6 +13,6 @@ public class UserEntity {
     private String email;
     private String password;
     private List<TweetEntity> tweets;
-    private List<CommentEntity> comments;
+    private List<CommentEntity> comments = new ArrayList<>();
 
 }

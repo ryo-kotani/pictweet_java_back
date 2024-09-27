@@ -12,35 +12,45 @@ import org.apache.ibatis.annotations.Result;
 import org.apache.ibatis.annotations.Results;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
+import org.apache.ibatis.mapping.FetchType;
 
 
 @Mapper
 public interface TweetRepository {
     @Select("SELECT * FROM tweets WHERE id = #{id}")
     @Results(value = {
-        @Result(property = "id", column = "id"),
-        @Result(property = "text", column = "text"),
-        @Result(property = "image", column = "image"),
         @Result(property = "user", column = "user_id",
-                one = @One(select = "in.tech_camp.pictweet.UserRepository.findById")),
-        @Result(property = "comments", column = "id",
-                many = @Many(select = "in.tech_camp.pictweet.CommentRepository.findByTweetId"))
+                one = @One(select = "in.tech_camp.pictweet.UserRepository.findById", fetchType = FetchType.LAZY))
     })
     TweetEntity findById(Integer id);
 
     @Select("SELECT * FROM tweets WHERE text LIKE CONCAT('%', #{text}, '%')")
+    @Results(value = {
+        @Result(property = "user", column = "user_id",
+                one = @One(select = "in.tech_camp.pictweet.UserRepository.findById", fetchType = FetchType.LAZY))
+    })
     List<TweetEntity> findByTextContaining(String text);
 
+    // @Select("SELECT t.*, u.* FROM tweets t LEFT JOIN users u ON t.user_id = u.id WHERE t.user_id = #{id}")
+    // @Results(value = {
+    //     @Result(property = "id", column = "t.id"),
+    //     @Result(property = "text", column = "t.text"),
+    //     @Result(property = "user.id", column = "u.id"),
+    //     @Result(property = "user.nickname", column = "u.nickname"),
+    //     @Result(property = "user.email", column = "u.email")
+    // })
+    // List<TweetEntity> findByUserId(Integer id);
     @Select("SELECT * FROM tweets WHERE user_id = #{id}")
+    @Results(value = {
+        @Result(property = "user", column = "user_id",
+                one = @One(select = "in.tech_camp.pictweet.UserRepository.findById", fetchType = FetchType.LAZY))
+    })
     List<TweetEntity> findByUserId(Integer id);
 
     @Select("SELECT t.*, u.* FROM tweets t LEFT JOIN users u ON t.user_id = u.id")
     @Results(value = {
-        @Result(property = "id", column = "id"),
-        @Result(property = "text", column = "text"),
-        @Result(property = "image", column = "image"),
         @Result(property = "user", column = "user_id",
-                one = @One(select = "in.tech_camp.pictweet.UserRepository.findById"))
+                one = @One(select = "in.tech_camp.pictweet.UserRepository.findById", fetchType = FetchType.LAZY))
     })
     List<TweetEntity> findAll();
 
