@@ -30,6 +30,7 @@ public class SecurityConfig {
                         .loginPage("/loginForm")
                         .defaultSuccessUrl("/")
                         .failureUrl("/login?error")
+                        .usernameParameter("email") 
                         .permitAll())
 
                 .logout(logout -> logout
