@@ -7,7 +7,6 @@ import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockHttpSession;
@@ -32,22 +31,21 @@ import in.tech_camp.pictweet.factories.TweetFormFactory;
 import in.tech_camp.pictweet.factories.UserFormFactory;
 import in.tech_camp.pictweet.support.LoginSupport;
 import jakarta.servlet.http.HttpSession;
+import lombok.AllArgsConstructor;
 
 @ActiveProfiles("test")
 @SpringBootTest(classes = PicTweetApplication.class)
 @AutoConfigureMockMvc
+@AllArgsConstructor
 public class TweetIntegrationTest {
     private UserForm userForm;
     private UserEntity userEntity;
 
-    @Autowired
-    private MockMvc mockMvc;
+    private final MockMvc mockMvc;
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
-    @Autowired
-    private TweetRepository tweetRepository;
+    private final TweetRepository tweetRepository;
 
     @BeforeEach
     public void setup() {

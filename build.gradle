@@ -51,6 +51,8 @@ dependencies {
 	testImplementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter-test:3.0.3'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	testCompileOnly 'org.projectlombok:lombok' // テスト用
+  testAnnotationProcessor 'org.projectlombok:lombok' // テスト用
 	// Facker
 	implementation 'com.github.javafaker:javafaker:1.0.2'
 

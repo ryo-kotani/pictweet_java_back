@@ -2,7 +2,6 @@ package in.tech_camp.pictweet.system;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -24,20 +23,20 @@ import in.tech_camp.pictweet.UserService;
 import in.tech_camp.pictweet.factories.UserFormFactory;
 import in.tech_camp.pictweet.support.LoginSupport;
 import jakarta.servlet.http.HttpSession;
+import lombok.AllArgsConstructor;
 
 
 @ActiveProfiles("test")
 @SpringBootTest(classes = PicTweetApplication.class)
 @AutoConfigureMockMvc
+@AllArgsConstructor
 public class UserLoginIntegrationTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+    private  final MockMvc mockMvc;
 
     private UserForm userForm;
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
     @BeforeEach
     public void setup() {
