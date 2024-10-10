@@ -2,6 +2,7 @@ package in.tech_camp.pictweet.form;
 
 import java.util.Set;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -34,6 +35,12 @@ public class UserFormUnitTest {
     @Test
     public void nicknameが空では登録できない() {
         userForm.setNickname(""); // 空のニックネーム
+        userForm.setEmail("test@test.com"); // メールアドレス
+        userForm.setPassword("techcamp123"); // パスワード
+        userForm.setPasswordConfirmation("techcamp123");// 確認用パスワード
         Set<ConstraintViolation<UserForm>> violations = validator.validate(userForm, ValidGroup1.class);
+
+        assertEquals(1, violations.size());
+        assertEquals("Nickname can't be blank", violations.iterator().next().getMessage());
     }
 }
