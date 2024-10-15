@@ -3,7 +3,6 @@ package in.tech_camp.pictweet.form;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -18,26 +17,16 @@ import jakarta.validation.ValidatorFactory;
 @ActiveProfiles("test")
 @SpringBootTest
 public class UserFormUnitTest {
-
-    private UserForm userForm;
-    private Validator validator;
-
-    @BeforeEach
-    public void setUp() {
-        // UserFormのインスタンスを初期化
-        userForm = new UserForm();
-
-        // バリデータの初期化
-        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-        validator = factory.getValidator();
-    }
-
     @Test
-    public void nicknameが空では登録できない() {
+    public void nicknameが空では登録できない () {
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        Validator validator = factory.getValidator();
+        UserForm userForm = new UserForm();
         userForm.setNickname(""); // 空のニックネーム
-        userForm.setEmail("test@test.com"); // メールアドレス
-        userForm.setPassword("techcamp123"); // パスワード
-        userForm.setPasswordConfirmation("techcamp123");// 確認用パスワード
+        userForm.setEmail("test@example.com");
+        userForm.setPassword("password");
+        userForm.setPasswordConfirmation("password");
+
         Set<ConstraintViolation<UserForm>> violations = validator.validate(userForm, ValidGroup1.class);
 
         assertEquals(1, violations.size());
