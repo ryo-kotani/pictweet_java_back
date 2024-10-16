@@ -59,7 +59,12 @@ public class UserFormUnitTest {
 
     @Test
     public void passwordが空では登録できない() {
+        userForm.setPassword(""); // 空のパスワード
 
+        Set<ConstraintViolation<UserForm>> violations = validator.validate(userForm, ValidGroup1.class);
+
+        assertEquals(1, violations.size());
+        assertEquals("Password can't be blank", violations.iterator().next().getMessage());
     }
 
     @Test
@@ -79,16 +84,30 @@ public class UserFormUnitTest {
 
     @Test
     public void emailはアットマークを含まないと登録できない() {
-
+        userForm.setEmail("invalidEmail"); // 無効なメール
+        Set<ConstraintViolation<UserForm>> violations = validator.validate(userForm, ValidGroup2.class);
+        assertEquals(1, violations.size());
+        assertEquals("Email should be valid", violations.iterator().next().getMessage());
     }
+
 
     @Test
     public void passwordが5文字以下では登録できない() {
-
+        String password = "a".repeat(5);
+        userForm.setPassword(password); // 短すぎるパスワード
+        Set<ConstraintViolation<UserForm>> violations = validator.validate(userForm, ValidGroup2.class);
+        violations.forEach(violation -> System.out.println(violation.getMessage()));
+        assertEquals(1, violations.size());
+        assertEquals("Password should be between 6 and 128 characters", violations.iterator().next().getMessage());
     }
 
     @Test
     public void passwordが129文字以上では登録できない() {
-
+        String password = "a".repeat(129);
+        userForm.setPassword(password); // 長すぎるパスワード
+        Set<ConstraintViolation<UserForm>> violations = validator.validate(userForm, ValidGroup2.class);
+        violations.forEach(violation -> System.out.println(violation.getMessage()));
+        assertEquals(1, violations.size());
+        assertEquals("Password should be between 6 and 128 characters", violations.iterator().next().getMessage());
     }
 }
