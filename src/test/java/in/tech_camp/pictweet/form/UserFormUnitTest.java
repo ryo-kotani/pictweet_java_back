@@ -43,27 +43,20 @@ public class UserFormUnitTest {
 
     @Test
     public void nicknameが空では登録できない () {
-        userForm.setNickname(""); // 空のニックネーム
+        userForm.setNickname("");
         Set<ConstraintViolation<UserForm>> violations = validator.validate(userForm, ValidGroup1.class);
         assertEquals(1, violations.size());
         assertEquals("Nickname can't be blank", violations.iterator().next().getMessage());
     }
 
     @Test
-    public void nicknameが7文字以上では登録できない() {
-        userForm.setNickname("TooLong"); // ニックネームが7文字以上
-        Set<ConstraintViolation<UserForm>> violations = validator.validate(userForm, ValidGroup2.class);
-        assertEquals(1, violations.size());
-        assertEquals("Nickname is too long (maximum is 6 characters)", violations.iterator().next().getMessage());
-    }
-
-    @Test
     public void emailが空では登録できない() {
-        userForm.setEmail(""); // 空のメール
+        userForm.setEmail("");
         Set<ConstraintViolation<UserForm>> violations = validator.validate(userForm, ValidGroup1.class);
         assertEquals(1, violations.size());
         assertEquals("Email can't be blank", violations.iterator().next().getMessage());
     }
+
     @Test
     public void passwordが空では登録できない() {
 
@@ -75,6 +68,14 @@ public class UserFormUnitTest {
         userForm.validatePasswords(bindingResult);
 
         verify(bindingResult).rejectValue("passwordConfirmation", "error.user", "Password confirmation doesn't match Password");
+    }
+
+    @Test
+    public void nicknameが7文字以上では登録できない() {
+        userForm.setNickname("TooLong");
+        Set<ConstraintViolation<UserForm>> violations = validator.validate(userForm, ValidGroup2.class);
+        assertEquals(1, violations.size());
+        assertEquals("Nickname is too long (maximum is 6 characters)", violations.iterator().next().getMessage());
     }
 
     @Test
