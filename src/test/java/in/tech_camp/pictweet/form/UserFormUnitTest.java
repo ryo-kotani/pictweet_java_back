@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import static org.mockito.Mockito.verify;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.validation.BindingResult;
@@ -65,7 +66,7 @@ public class UserFormUnitTest {
     public void passwordとpasswordConfirmationが不一致では登録できない() {
         userForm.setPasswordConfirmation("differentPassword");
         userForm.validatePasswords(bindingResult);
-
+        verify(bindingResult).rejectValue("passwordConfirmation", "error.user", "Password confirmation doesn't match Password");
     }
 
     @Test
