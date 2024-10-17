@@ -1,4 +1,4 @@
-package in.tech_camp.pictweet;
+package in.tech_camp.pictweet.entity;
 
 import lombok.Data;
 

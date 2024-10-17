@@ -1,10 +1,13 @@
-package in.tech_camp.pictweet;
+package in.tech_camp.pictweet.service;
 
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import in.tech_camp.pictweet.custom_user.CustomUserDetail;
+import in.tech_camp.pictweet.entity.UserEntity;
+import in.tech_camp.pictweet.repository.UserRepository;
 import lombok.AllArgsConstructor;
 
 

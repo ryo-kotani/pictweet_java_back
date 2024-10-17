@@ -1,4 +1,4 @@
-package in.tech_camp.pictweet;
+package in.tech_camp.pictweet.entity;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,6 +13,6 @@ public class TweetEntity {
 
     private String image;
 
-    private UserEntity user;            // ユーザーのプロパティ
+    private UserEntity user;
     private List<CommentEntity> comments = new ArrayList<>();
 }

@@ -1,4 +1,4 @@
-package in.tech_camp.pictweet;
+package in.tech_camp.pictweet.form;
 
 import lombok.Data;
 @Data

@@ -12,9 +12,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.validation.BindingResult;
 
-import in.tech_camp.pictweet.UserForm;
-import in.tech_camp.pictweet.ValidGroup1;
-import in.tech_camp.pictweet.ValidGroup2;
+import in.tech_camp.pictweet.form.UserForm;
+import in.tech_camp.pictweet.validation.ValidGroup1;
+import in.tech_camp.pictweet.validation.ValidGroup2;
 import in.tech_camp.pictweet.factory.UserFormFactory;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;

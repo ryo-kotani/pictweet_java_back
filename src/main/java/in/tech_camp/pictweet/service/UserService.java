@@ -1,9 +1,11 @@
-package in.tech_camp.pictweet;
+package in.tech_camp.pictweet.service;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import in.tech_camp.pictweet.entity.UserEntity;
+import in.tech_camp.pictweet.repository.UserRepository;
 import lombok.AllArgsConstructor;
 
 @Service

@@ -8,8 +8,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import in.tech_camp.pictweet.TweetForm;
-import in.tech_camp.pictweet.ValidGroup1;
+import in.tech_camp.pictweet.form.TweetForm;
+import in.tech_camp.pictweet.validation.ValidGroup1;
 import in.tech_camp.pictweet.factory.TweetFormFactory;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;

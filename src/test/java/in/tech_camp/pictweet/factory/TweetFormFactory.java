@@ -2,7 +2,7 @@ package in.tech_camp.pictweet.factory;
 
 import com.github.javafaker.Faker;
 
-import in.tech_camp.pictweet.TweetForm;
+import in.tech_camp.pictweet.form.TweetForm;
 
 public class TweetFormFactory {
   private static final Faker faker = new Faker();

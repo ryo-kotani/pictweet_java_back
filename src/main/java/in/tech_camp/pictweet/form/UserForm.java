@@ -1,8 +1,10 @@
-package in.tech_camp.pictweet;
+package in.tech_camp.pictweet.form;
 
 import org.hibernate.validator.constraints.Length;
 import org.springframework.validation.BindingResult;
 
+import in.tech_camp.pictweet.validation.ValidGroup1;
+import in.tech_camp.pictweet.validation.ValidGroup2;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;

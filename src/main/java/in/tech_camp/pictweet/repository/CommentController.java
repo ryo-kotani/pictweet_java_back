@@ -1,4 +1,4 @@
-package in.tech_camp.pictweet;
+package in.tech_camp.pictweet.repository;
 
 import java.util.List;
 
@@ -12,6 +12,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import in.tech_camp.pictweet.controller.CommentRepository;
+import in.tech_camp.pictweet.custom_user.CustomUserDetail;
+import in.tech_camp.pictweet.entity.CommentEntity;
+import in.tech_camp.pictweet.entity.TweetEntity;
+import in.tech_camp.pictweet.entity.UserEntity;
+import in.tech_camp.pictweet.form.CommentForm;
+import in.tech_camp.pictweet.validation.GroupOrder;
 import lombok.AllArgsConstructor;
 
 @Controller

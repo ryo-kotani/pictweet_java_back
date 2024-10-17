@@ -1,4 +1,4 @@
-package in.tech_camp.pictweet;
+package in.tech_camp.pictweet.controller;
 
 import java.util.List;
 
@@ -9,6 +9,8 @@ import org.apache.ibatis.annotations.Options;
 import org.apache.ibatis.annotations.Result;
 import org.apache.ibatis.annotations.Results;
 import org.apache.ibatis.annotations.Select;
+
+import in.tech_camp.pictweet.entity.CommentEntity;
 
 
 @Mapper

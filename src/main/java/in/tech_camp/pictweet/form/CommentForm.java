@@ -1,5 +1,6 @@
-package in.tech_camp.pictweet;
+package in.tech_camp.pictweet.form;
 
+import in.tech_camp.pictweet.validation.ValidGroup1;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 

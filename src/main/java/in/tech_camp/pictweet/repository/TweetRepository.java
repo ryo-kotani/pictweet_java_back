@@ -1,4 +1,4 @@
-package in.tech_camp.pictweet;
+package in.tech_camp.pictweet.repository;
 
 import java.util.List;
 
@@ -12,6 +12,8 @@ import org.apache.ibatis.annotations.Results;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 import org.apache.ibatis.mapping.FetchType;
+
+import in.tech_camp.pictweet.entity.TweetEntity;
 
 
 @Mapper

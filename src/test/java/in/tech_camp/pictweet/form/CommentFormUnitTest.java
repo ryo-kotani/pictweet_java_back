@@ -8,8 +8,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import in.tech_camp.pictweet.CommentForm;
-import in.tech_camp.pictweet.ValidGroup1;
+import in.tech_camp.pictweet.form.CommentForm;
+import in.tech_camp.pictweet.validation.ValidGroup1;
 import in.tech_camp.pictweet.factory.CommentFormFactory;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
