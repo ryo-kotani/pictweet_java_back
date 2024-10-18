@@ -12,7 +12,6 @@ import org.apache.ibatis.annotations.Result;
 import org.apache.ibatis.annotations.Results;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
-import org.apache.ibatis.mapping.FetchType;
 
 import in.tech_camp.pictweet.entity.TweetEntity;
 
@@ -48,11 +47,12 @@ public interface TweetRepository {
     })
     List<TweetEntity> findByUserId(Integer id);
 
-    @Select("SELECT t.*, u.id AS user_id, u.nickname AS user_nickname FROM tweets t JOIN users u ON t.user_id = u.id ORDER BY t.created_at DESC")
+    @Select("SELECT t.*, u.id AS user_id, u.nickname AS user_nickname, u.email AS user_email FROM tweets t JOIN users u ON t.user_id = u.id ORDER BY t.created_at DESC")
     @Results(value = {
         @Result(property = "id", column = "id"),
         @Result(property = "user.id", column = "user_id"),
         @Result(property = "user.nickname", column = "user_nickname"),
+        @Result(property = "user.email", column = "user_email"),
         @Result(property = "comments", column = "id",
                 many = @Many(select = "in.tech_camp.pictweet.repository.CommentRepository.findByTweetId"))
     })
