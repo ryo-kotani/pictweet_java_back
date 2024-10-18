@@ -10,11 +10,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
@@ -33,6 +31,7 @@ import in.tech_camp.pictweet.form.UserForm;
 import in.tech_camp.pictweet.repository.CommentRepository;
 import in.tech_camp.pictweet.repository.TweetRepository;
 import in.tech_camp.pictweet.service.UserService;
+import static in.tech_camp.pictweet.support.LoginSupport.login;
 import jakarta.servlet.http.HttpSession;
 
 @ActiveProfiles("test")
@@ -69,17 +68,7 @@ public class CommentIntegrationTest {
   @Test
   public void ログインしたユーザーはツイート詳細ページでコメント投稿できる() throws Exception {
      // ユーザーがログインする
-     MvcResult loginResult = mockMvc.perform(post("/login")
-     .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-     .param("username", userForm.getEmail())
-     .param("password", userForm.getPassword())
-     .with(csrf()))
-     .andExpect(status().isFound())
-     .andExpect(redirectedUrl("/"))
-     .andReturn();
-
-
-     HttpSession session = loginResult.getRequest().getSession();
+     HttpSession session = login(mockMvc, userForm);
 
     // ツイートを投稿
     String tweetText = "テストツイート詳細";
@@ -110,7 +99,7 @@ public class CommentIntegrationTest {
             .andExpect(status().isFound())
             .andExpect(redirectedUrl("/tweets/" + tweetId)); // 詳細ページにリダイレクトされることを確認
 
-     // コメントモデルのカウントが1増加しているか確認
+     // コメントテーブルのカウントが1増加しているか確認
      List<CommentEntity>  comments = commentRepository.findByTweetId(tweets.get(0).getId()); // コメントのカウントを取得するメソッドが必要
      Integer commentCount = comments.size();
      assertEquals(1, commentCount); // 初回なのでカウントは1

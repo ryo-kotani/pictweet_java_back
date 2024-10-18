@@ -13,11 +13,10 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
+
 
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -34,6 +33,7 @@ import in.tech_camp.pictweet.form.TweetForm;
 import in.tech_camp.pictweet.form.UserForm;
 import in.tech_camp.pictweet.repository.TweetRepository;
 import in.tech_camp.pictweet.service.UserService;
+import static in.tech_camp.pictweet.support.LoginSupport.login;
 import jakarta.servlet.http.HttpSession;
 import in.tech_camp.pictweet.factory.TweetFormFactory;
 import in.tech_camp.pictweet.factory.UserFormFactory;
@@ -70,25 +70,12 @@ public class TweetIntegrationTest {
    public void ログインしたユーザーは新規投稿できる() throws Exception {
        String tweetText = "テスト1";
 
-
-       MvcResult loginResult = mockMvc.perform(post("/login")
-               .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-               .param("username", userForm.getEmail())
-               .param("password", userForm.getPassword())
-               .with(csrf()))
-               .andExpect(status().isFound())
-               .andExpect(redirectedUrl("/"))
-               .andReturn();
-
-
-       HttpSession session = loginResult.getRequest().getSession();
-
+       HttpSession session = login(mockMvc, userForm);
 
        // 新規投稿ページへ遷移
        mockMvc.perform(get("/tweets/new").session((MockHttpSession) session))
                .andExpect(status().isOk())
                .andExpect(view().name("tweets/new"));
-
 
        // 新規投稿を行う
        mockMvc.perform(post("/tweets")
@@ -99,8 +86,7 @@ public class TweetIntegrationTest {
                .andExpect(status().isFound())
                .andExpect(redirectedUrl("/")); // リダイレクト先を確認
 
-
-       // Tweetモデルのカウントを確認
+       // Tweetテーブルのカウントを確認
        mockMvc.perform(get("/"))
                .andExpect(status().isOk())
                .andExpect(content().string(containsString(tweetText))); // トップページにツイートがあることを確認
@@ -112,7 +98,6 @@ public class TweetIntegrationTest {
                .andExpect(status().is3xxRedirection())
                .andExpect(redirectedUrl("http://localhost/loginForm")); // トップページにリダイレクトされることを確認
 
-
        // トップページには新規投稿ボタンがないことを確認
        mockMvc.perform(get("/"))
                .andExpect(status().isOk())
@@ -123,19 +108,7 @@ public class TweetIntegrationTest {
        // ユーザーがツイートを投稿する
        String originalTweetText = "テスト2";
 
-
-       MvcResult loginResult = mockMvc.perform(post("/login")
-               .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-               .param("username", userForm.getEmail())
-               .param("password", userForm.getPassword())
-               .with(csrf()))
-               .andExpect(status().isFound())
-               .andExpect(redirectedUrl("/"))
-               .andReturn();
-
-
-       HttpSession session = loginResult.getRequest().getSession();
-
+       HttpSession session = login(mockMvc, userForm);
 
        // ツイートを投稿
        mockMvc.perform(post("/tweets")
@@ -146,17 +119,12 @@ public class TweetIntegrationTest {
                .andExpect(status().isFound())
                .andExpect(redirectedUrl("/"));
 
-
-
-
        List<TweetEntity> tweets = tweetRepository.findByUserId(userEntity.getId());
-
 
        // 編集リンクの確認
        mockMvc.perform(get("/").session((MockHttpSession) session)) // トップページに移動
                .andExpect(status().isOk())
                .andExpect(content().string(containsString("編集"))); // 編集リンクがあることを確認
-
 
        // 編集ページに遷移
        mockMvc.perform(get("/tweets/{tweetId}/edit" ,tweets.get(0).getId())
@@ -164,7 +132,6 @@ public class TweetIntegrationTest {
                .andExpect(status().isOk())
                .andExpect(view().name("tweets/edit")) // 編集ページに正しく遷移
                .andExpect(content().string(containsString(originalTweetText))); // フォームに元の内容が入っていることを確認
-
 
        // ツイート内容を編集
        String updatedTweetText = "更新後のツイート";
@@ -176,7 +143,6 @@ public class TweetIntegrationTest {
                .andExpect(status().isFound())
                .andExpect(redirectedUrl("/"));
 
-
        // ツイートモデルのカウントが変わらないことの確認
        mockMvc.perform(get("/")) // 再度ツイートを確認
                .andExpect(content().string(containsString(updatedTweetText))) // 編集後の内容が含まれている
@@ -185,6 +151,7 @@ public class TweetIntegrationTest {
 
       @Test
    public void ログインしたユーザーは自分以外が投稿したツイートの編集画面には遷移できない() throws Exception {
+        // もう一人のユーザーを作成
        UserForm anotherUserForm = UserFormFactory.createUser();
        UserEntity anotherUser = new UserEntity();
        anotherUser.setEmail(anotherUserForm.getEmail());
@@ -192,7 +159,7 @@ public class TweetIntegrationTest {
        anotherUser.setPassword(anotherUserForm.getPassword());
        userService.registerNewUser(anotherUser);
 
-
+       //ログインしたユーザー以外の投稿したツイートを作成
        TweetForm tweetForm = TweetFormFactory.createTweet();
        TweetEntity tweet = new TweetEntity();
        tweet.setUser(anotherUser);
@@ -200,28 +167,14 @@ public class TweetIntegrationTest {
        tweet.setText(tweetForm.getText());
        tweetRepository.insert(tweet);
 
-
-       // 他のユーザーが投稿したツイートの編集画面へ遷移しようとする
-       MvcResult loginResult = mockMvc.perform(post("/login")
-               .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-               .param("username", userForm.getEmail())
-               .param("password", userForm.getPassword())
-               .with(csrf()))
-               .andExpect(status().isFound())
-               .andExpect(redirectedUrl("/"))
-               .andReturn();
-
-
-       HttpSession session = loginResult.getRequest().getSession();
-
+       HttpSession session = login(mockMvc, userForm);
 
        Integer tweetId = tweet.getId();
 
-
+       // 他のユーザーが投稿したツイートの編集画面へ遷移しようとする
        mockMvc.perform(get("/tweets/{tweetId}/edit", tweetId)
                .session((MockHttpSession) session))
                .andExpect(redirectedUrl("/")); // アクセス拒否が期待される
-
 
        // リダイレクトを確認
        mockMvc.perform(get("/")) // トップページに移動
@@ -236,22 +189,10 @@ public class TweetIntegrationTest {
                .andExpect(content().string(not(containsString("編集")))); // 編集リンクがないことを確認
    }
 
-   //
-   //ツイート削除機能
-   //
    @Test
    public void ログインしたユーザーは自らが投稿したツイートの削除ができる() throws Exception {
      // ツイートを投稿したユーザーでログインする
-     MvcResult loginResult = mockMvc.perform(post("/login")
-     .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-     .param("username", userForm.getEmail())
-     .param("password", userForm.getPassword())
-     .with(csrf()))
-     .andExpect(status().isFound())
-     .andExpect(redirectedUrl("/"))
-     .andReturn();
-
-     HttpSession session = loginResult.getRequest().getSession();
+     HttpSession session = login(mockMvc, userForm);
 
      // ツイートを投稿
      String tweetText = "テスト3";
@@ -270,11 +211,9 @@ public class TweetIntegrationTest {
 
      List<TweetEntity> tweets = tweetRepository.findByUserId(userEntity.getId());
 
-
      // ツイートを削除
      List<TweetEntity> tweetsBeforeDeletion = tweetRepository.findAll();
      Integer initialCount = tweetsBeforeDeletion.size();
-
 
      mockMvc.perform(post("/tweets/{tweetId}/delete", userEntity.getId(), tweets.get(0).getId()) // ツイートIDを取得して削除
              .with(csrf())
@@ -282,12 +221,10 @@ public class TweetIntegrationTest {
              .andExpect(status().isFound())
              .andExpect(redirectedUrl("/"));
 
-
      // レコードの数が1減ったことを確認
      List<TweetEntity> tweetsAfterDeletion = tweetRepository.findAll();
      Integer afterCount = tweetsAfterDeletion.size();
      assertEquals(initialCount - 1, afterCount);
-
 
      // トップページにツイートの内容が存在しないことを確認
      mockMvc.perform(get("/"))
@@ -305,7 +242,6 @@ public class TweetIntegrationTest {
        anotherUser.setPassword(anotherUserForm.getPassword());
        userService.registerNewUser(anotherUser);
 
-
        // ツイートの作成
        String tweetText = "テスト4";
        TweetEntity tweet = new TweetEntity();
@@ -313,26 +249,13 @@ public class TweetIntegrationTest {
        tweet.setText(tweetText);
        tweetRepository.insert(tweet);
 
-
        // ツイートを投稿したユーザーでログイン
-       MvcResult loginResult = mockMvc.perform(post("/login")
-       .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-       .param("username", userForm.getEmail())
-       .param("password", userForm.getPassword())
-       .with(csrf()))
-       .andExpect(status().isFound())
-       .andExpect(redirectedUrl("/"))
-       .andReturn();
-
-
-       HttpSession session = loginResult.getRequest().getSession();
-
+       HttpSession session = login(mockMvc, userForm);
 
        // ツイートに「削除」リンクがないことを確認
        mockMvc.perform(get("/").session((MockHttpSession) session))
                .andExpect(status().isOk())
                .andExpect(content().string(not(containsString("削除")))); // ツイートには「削除」リンクがないことを確認
-
 
        // ログインしていない状態で削除ボタンがないことも確認
        mockMvc.perform(get("/"))
@@ -343,18 +266,7 @@ public class TweetIntegrationTest {
   @Test
   public void ログインしたユーザーはツイート詳細ページに遷移してコメント投稿欄が表示される() throws Exception {
      // ユーザーがログインする
-     MvcResult loginResult = mockMvc.perform(post("/login")
-     .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-     .param("username", userForm.getEmail())
-     .param("password", userForm.getPassword())
-     .with(csrf()))
-     .andExpect(status().isFound())
-     .andExpect(redirectedUrl("/"))
-     .andReturn();
-
-
-     HttpSession session = loginResult.getRequest().getSession();
-
+     HttpSession session = login(mockMvc, userForm);
 
      // ツイートを投稿
      String tweetText = "テスト5";
@@ -366,10 +278,8 @@ public class TweetIntegrationTest {
              .andExpect(status().isFound())
              .andExpect(redirectedUrl("/"));
 
-
      // 詳細ページに遷移するためのテスト
      List<TweetEntity> tweets = tweetRepository.findByUserId(userEntity.getId()); // 自分のツイートを取得
-
 
      // 詳細ページに遷移
      mockMvc.perform(get("/tweets/{tweetId}", tweets.get(0).getId()) // ツイートIDで詳細ページに遷移
@@ -381,18 +291,7 @@ public class TweetIntegrationTest {
  @Test
  public void ログインしていない状態でツイート詳細ページに遷移できるもののコメント投稿欄が表示されない() throws Exception {
      // ユーザーがログインする
-     MvcResult loginResult = mockMvc.perform(post("/login")
-     .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-     .param("username", userForm.getEmail())
-     .param("password", userForm.getPassword())
-     .with(csrf()))
-     .andExpect(status().isFound())
-     .andExpect(redirectedUrl("/"))
-     .andReturn();
-
-
-     HttpSession session = loginResult.getRequest().getSession();
-
+     HttpSession session = login(mockMvc, userForm);
 
      // ツイートを投稿
      String tweetText = "テスト6";
@@ -404,16 +303,13 @@ public class TweetIntegrationTest {
              .andExpect(status().isFound())
              .andExpect(redirectedUrl("/"));
 
-
      // トップページに移動する
      mockMvc.perform(get("/"))
              .andExpect(status().isOk())
              .andExpect(content().string(containsString("詳細"))); // ツイートに「詳細」へのリンクがあることを確認
 
-
      // 投稿されたツイートのリストを取得
      List<TweetEntity> tweets = tweetRepository.findAll(); // ツイートを取得
-
 
      // 詳細ページに遷移
      mockMvc.perform(get("/tweets/{tweetId}", tweets.get(0).getId())) // ツイートIDで詳細ページに遷移
