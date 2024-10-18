@@ -19,7 +19,7 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
-                        .requestMatchers("/css/**", "/images/**", "/uploads/**", "/", "/loginForm", "/registerForm").permitAll()
+                        .requestMatchers("/css/**", "/", "/loginForm", "/registerForm").permitAll()
                         .requestMatchers(HttpMethod.POST, "/register").permitAll()
                         .requestMatchers("/tweets/search").permitAll()
                         .requestMatchers("/tweets/{id:[0-9]+}").permitAll()
@@ -28,9 +28,9 @@ public class SecurityConfig {
                 .formLogin(login -> login
                         .loginProcessingUrl("/login")
                         .loginPage("/loginForm")
-                        .defaultSuccessUrl("/")
+                        .defaultSuccessUrl("/",true)
                         .failureUrl("/login?error")
-                        .usernameParameter("email") 
+                        .usernameParameter("email")
                         .permitAll())
 
                 .logout(logout -> logout
