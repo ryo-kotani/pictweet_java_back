@@ -1,5 +1,7 @@
 package in.tech_camp.pictweet.system;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -19,13 +21,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-
 import in.tech_camp.pictweet.PicTweetApplication;
 import in.tech_camp.pictweet.entity.CommentEntity;
 import in.tech_camp.pictweet.entity.TweetEntity;
 import in.tech_camp.pictweet.entity.UserEntity;
 import in.tech_camp.pictweet.factory.UserFormFactory;
 import in.tech_camp.pictweet.form.UserForm;
+import in.tech_camp.pictweet.repository.TweetRepository;
 import in.tech_camp.pictweet.service.UserService;
 import jakarta.servlet.http.HttpSession;
 
@@ -41,6 +43,9 @@ public class CommentIntegrationTest {
 
   @Autowired
   private UserService userService;
+
+  @Autowired
+  private TweetRepository tweetRepository;
 
   @BeforeEach
   public void setup() {
@@ -67,5 +72,19 @@ public class CommentIntegrationTest {
 
 
      HttpSession session = loginResult.getRequest().getSession();
- }
+
+    // ツイートを投稿
+    String tweetText = "テストツイート詳細";
+    mockMvc.perform(post("/tweets")
+            .param("text", tweetText)
+            .param("image", "test.png")
+            .with(csrf())
+            .session((MockHttpSession) session))
+            .andExpect(status().isFound())
+            .andExpect(redirectedUrl("/"));
+
+    // 投稿されたツイートを取得
+    List<TweetEntity> tweets = tweetRepository.findAll();
+    Integer tweetId = tweets.get(0).getId();
+}
 }
