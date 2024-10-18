@@ -61,8 +61,9 @@ public class CommentIntegrationTest {
 
       userService.registerNewUser(userEntity);
   }
-   @Test
- public void ログインしたユーザーはツイート詳細ページでコメント投稿できる() throws Exception {
+
+  @Test
+  public void ログインしたユーザーはツイート詳細ページでコメント投稿できる() throws Exception {
      // ユーザーがログインする
      MvcResult loginResult = mockMvc.perform(post("/login")
      .contentType(MediaType.APPLICATION_FORM_URLENCODED)
@@ -95,5 +96,14 @@ public class CommentIntegrationTest {
              .session((MockHttpSession) session))
              .andExpect(status().isOk())
              .andExpect(content().string(containsString(tweetText))); // ツイートの内容が含まれているか確認
-}
+
+    // コメントを送信
+    String commentText = "これはテストコメントです";
+    mockMvc.perform(post("/tweets/{tweetId}/comment", tweetId)
+            .param("text", commentText) // コメントのテキストを設定
+            .with(csrf())
+            .session((MockHttpSession) session))
+            .andExpect(status().isFound())
+            .andExpect(redirectedUrl("/tweets/" + tweetId)); // 詳細ページにリダイレクトされることを確認
+  }
 }
