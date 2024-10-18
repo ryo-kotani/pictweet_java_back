@@ -28,10 +28,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import in.tech_camp.pictweet.PicTweetApplication;
 import in.tech_camp.pictweet.entity.TweetEntity;
 import in.tech_camp.pictweet.entity.UserEntity;
+import in.tech_camp.pictweet.form.TweetForm;
 import in.tech_camp.pictweet.form.UserForm;
 import in.tech_camp.pictweet.repository.TweetRepository;
 import in.tech_camp.pictweet.service.UserService;
 import jakarta.servlet.http.HttpSession;
+import in.tech_camp.pictweet.factory.TweetFormFactory;
 import in.tech_camp.pictweet.factory.UserFormFactory;
 
 @ActiveProfiles("test")
@@ -178,4 +180,51 @@ public class TweetIntegrationTest {
                .andExpect(content().string(containsString(updatedTweetText))) // 編集後の内容が含まれている
                .andExpect(content().string(not(containsString(originalTweetText)))); // 元の内容は含まれていない
    }
+
+      @Test
+   public void ログインしたユーザーは自分以外が投稿したツイートの編集画面には遷移できない() throws Exception {
+       UserForm anotherUserForm = UserFormFactory.createUser();
+       UserEntity anotherUser = new UserEntity();
+       anotherUser.setEmail(anotherUserForm.getEmail());
+       anotherUser.setNickname(anotherUserForm.getNickname());
+       anotherUser.setPassword(anotherUserForm.getPassword());
+       userService.registerNewUser(anotherUser);
+
+
+       TweetForm tweetForm = TweetFormFactory.createTweet();
+       TweetEntity tweet = new TweetEntity();
+       tweet.setUser(anotherUser);
+       tweet.setImage(tweetForm.getImage());
+       tweet.setText(tweetForm.getText());
+       tweetRepository.insert(tweet);
+
+
+       // 他のユーザーが投稿したツイートの編集画面へ遷移しようとする
+       MvcResult loginResult = mockMvc.perform(post("/login")
+               .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+               .param("username", userForm.getEmail())
+               .param("password", userForm.getPassword())
+               .with(csrf()))
+               .andExpect(status().isFound())
+               .andExpect(redirectedUrl("/"))
+               .andReturn();
+
+
+       HttpSession session = loginResult.getRequest().getSession();
+
+
+       Integer tweetId = tweet.getId();
+
+
+       mockMvc.perform(get("/tweets/{tweetId}/edit", tweetId)
+               .session((MockHttpSession) session))
+               .andExpect(redirectedUrl("/")); // アクセス拒否が期待される
+
+
+       // リダイレクトを確認
+       mockMvc.perform(get("/")) // トップページに移動
+               .andExpect(status().isOk())
+               .andExpect(content().string(not(containsString("編集")))); // 編集リンクがないことを確認
+   }
+
 }
