@@ -295,5 +295,49 @@ public class TweetIntegrationTest {
              .andExpect(content().string(not(containsString(tweetText))));
    }
 
+   @Test
+   public void ログインしたユーザーは自分以外が投稿したツイートの削除ができない() throws Exception {
+       // 別のユーザーがツイートを作成
+       UserForm anotherUserForm = UserFormFactory.createUser();
+       UserEntity anotherUser = new UserEntity();
+       anotherUser.setEmail(anotherUserForm.getEmail());
+       anotherUser.setNickname(anotherUserForm.getNickname());
+       anotherUser.setPassword(anotherUserForm.getPassword());
+       userService.registerNewUser(anotherUser);
+
+
+       // ツイートの作成
+       String tweetText = "テスト4";
+       TweetEntity tweet = new TweetEntity();
+       tweet.setUser(anotherUser);
+       tweet.setText(tweetText);
+       tweetRepository.insert(tweet);
+
+
+       // ツイートを投稿したユーザーでログイン
+       MvcResult loginResult = mockMvc.perform(post("/login")
+       .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+       .param("username", userForm.getEmail())
+       .param("password", userForm.getPassword())
+       .with(csrf()))
+       .andExpect(status().isFound())
+       .andExpect(redirectedUrl("/"))
+       .andReturn();
+
+
+       HttpSession session = loginResult.getRequest().getSession();
+
+
+       // ツイートに「削除」リンクがないことを確認
+       mockMvc.perform(get("/").session((MockHttpSession) session))
+               .andExpect(status().isOk())
+               .andExpect(content().string(not(containsString("削除")))); // ツイートには「削除」リンクがないことを確認
+
+
+       // ログインしていない状態で削除ボタンがないことも確認
+       mockMvc.perform(get("/"))
+               .andExpect(status().isOk())
+               .andExpect(content().string(not(containsString("削除")))); // トップページに「削除」リンクがないことを確認
+   }
 
 }
