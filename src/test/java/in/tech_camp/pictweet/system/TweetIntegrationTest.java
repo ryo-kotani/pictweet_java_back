@@ -227,4 +227,11 @@ public class TweetIntegrationTest {
                .andExpect(content().string(not(containsString("編集")))); // 編集リンクがないことを確認
    }
 
+   @Test
+   public void ログインしていないとツイートの編集画面には遷移できない() throws Exception {
+       mockMvc.perform(get("/"))
+               .andExpect(status().isOk())
+               .andExpect(content().string(not(containsString("編集")))); // 編集リンクがないことを確認
+   }
+
 }
