@@ -1,6 +1,7 @@
 package in.tech_camp.pictweet.system;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -95,4 +96,18 @@ public class TweetIntegrationTest {
                .andExpect(status().isOk())
                .andExpect(content().string(containsString(tweetText))); // トップページにツイートがあることを確認
    }
+   @Test
+   public void ログインしていないと新規投稿ページに遷移できない() throws Exception {
+       // ログインしていない状態で新規投稿ページにアクセスしようとする
+       mockMvc.perform(get("/tweets/new"))
+               .andExpect(status().is3xxRedirection())
+               .andExpect(redirectedUrl("http://localhost/loginForm")); // トップページにリダイレクトされることを確認
+
+
+       // トップページには新規投稿ボタンがないことを確認
+       mockMvc.perform(get("/"))
+               .andExpect(status().isOk())
+               .andExpect(content().string(not(containsString("新規投稿")))); // ボタンが含まれていないことを確認
+   }
+
 }
