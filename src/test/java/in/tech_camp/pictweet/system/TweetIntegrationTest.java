@@ -1,5 +1,7 @@
 package in.tech_camp.pictweet.system;
 
+import java.util.List;
+
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,13 +26,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import in.tech_camp.pictweet.PicTweetApplication;
-
+import in.tech_camp.pictweet.entity.TweetEntity;
 import in.tech_camp.pictweet.entity.UserEntity;
 import in.tech_camp.pictweet.form.UserForm;
+import in.tech_camp.pictweet.repository.TweetRepository;
 import in.tech_camp.pictweet.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import in.tech_camp.pictweet.factory.UserFormFactory;
-import lombok.AllArgsConstructor;
 
 @ActiveProfiles("test")
 @SpringBootTest(classes = PicTweetApplication.class)
@@ -45,6 +47,9 @@ public class TweetIntegrationTest {
     private MockMvc mockMvc;
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private TweetRepository tweetRepository;
 
     @BeforeEach
     public void setup() {
@@ -109,5 +114,68 @@ public class TweetIntegrationTest {
                .andExpect(status().isOk())
                .andExpect(content().string(not(containsString("新規投稿")))); // ボタンが含まれていないことを確認
    }
+@Test
+   public void ログインしたユーザーは自分が投稿したツイートの編集ができる() throws Exception {
+       // ユーザーがツイートを投稿する
+       String originalTweetText = "テスト2";
 
+
+       MvcResult loginResult = mockMvc.perform(post("/login")
+               .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+               .param("username", userForm.getEmail())
+               .param("password", userForm.getPassword())
+               .with(csrf()))
+               .andExpect(status().isFound())
+               .andExpect(redirectedUrl("/"))
+               .andReturn();
+
+
+       HttpSession session = loginResult.getRequest().getSession();
+
+
+       // ツイートを投稿
+       mockMvc.perform(post("/tweets")
+               .param("text", originalTweetText)
+               .param("image", "test.png")
+               .with(csrf())
+               .session((MockHttpSession) session))
+               .andExpect(status().isFound())
+               .andExpect(redirectedUrl("/"));
+
+
+
+
+       List<TweetEntity> tweets = tweetRepository.findByUserId(userEntity.getId());
+
+
+       // 編集リンクの確認
+       mockMvc.perform(get("/").session((MockHttpSession) session)) // トップページに移動
+               .andExpect(status().isOk())
+               .andExpect(content().string(containsString("編集"))); // 編集リンクがあることを確認
+
+
+       // 編集ページに遷移
+       mockMvc.perform(get("/tweets/{tweetId}/edit" ,tweets.get(0).getId())
+               .session((MockHttpSession) session))
+               .andExpect(status().isOk())
+               .andExpect(view().name("tweets/edit")) // 編集ページに正しく遷移
+               .andExpect(content().string(containsString(originalTweetText))); // フォームに元の内容が入っていることを確認
+
+
+       // ツイート内容を編集
+       String updatedTweetText = "更新後のツイート";
+       mockMvc.perform(post("/tweets/{tweetId}/update" ,tweets.get(0).getId()) // 編集処理
+               .param("text", updatedTweetText)
+               .param("image", "test.png")
+               .with(csrf())
+               .session((MockHttpSession) session))
+               .andExpect(status().isFound())
+               .andExpect(redirectedUrl("/"));
+
+
+       // ツイートモデルのカウントが変わらないことの確認
+       mockMvc.perform(get("/")) // 再度ツイートを確認
+               .andExpect(content().string(containsString(updatedTweetText))) // 編集後の内容が含まれている
+               .andExpect(content().string(not(containsString(originalTweetText)))); // 元の内容は含まれていない
+   }
 }
