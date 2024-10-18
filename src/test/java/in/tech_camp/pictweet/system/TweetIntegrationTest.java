@@ -340,4 +340,42 @@ public class TweetIntegrationTest {
                .andExpect(content().string(not(containsString("削除")))); // トップページに「削除」リンクがないことを確認
    }
 
+  @Test
+  public void ログインしたユーザーはツイート詳細ページに遷移してコメント投稿欄が表示される() throws Exception {
+     // ユーザーがログインする
+     MvcResult loginResult = mockMvc.perform(post("/login")
+     .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+     .param("username", userForm.getEmail())
+     .param("password", userForm.getPassword())
+     .with(csrf()))
+     .andExpect(status().isFound())
+     .andExpect(redirectedUrl("/"))
+     .andReturn();
+
+
+     HttpSession session = loginResult.getRequest().getSession();
+
+
+     // ツイートを投稿
+     String tweetText = "テスト5";
+     mockMvc.perform(post("/tweets")
+             .param("text", tweetText)
+             .param("image", "test.png")
+             .with(csrf())
+             .session((MockHttpSession) session))
+             .andExpect(status().isFound())
+             .andExpect(redirectedUrl("/"));
+
+
+     // 詳細ページに遷移するためのテスト
+     List<TweetEntity> tweets = tweetRepository.findByUserId(userEntity.getId()); // 自分のツイートを取得
+
+
+     // 詳細ページに遷移
+     mockMvc.perform(get("/tweets/{tweetId}", tweets.get(0).getId()) // ツイートIDで詳細ページに遷移
+             .session((MockHttpSession) session))
+             .andExpect(status().isOk())
+             .andExpect(content().string(containsString(tweetText))) // ツイートの内容が含まれているか確認
+             .andExpect(content().string(containsString("コメントする"))); // コメント用のフォームが存在することを確認
+ }
 }
