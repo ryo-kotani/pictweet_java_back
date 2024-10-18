@@ -49,8 +49,7 @@ public class UserRegistrationIntegrationTest {
     }
 
     @Test
-    void
-    正しい情報を入力すればユーザー新規登録ができてトップページに移動する() throws Exception {
+    void 正しい情報を入力すればユーザー新規登録ができてトップページに移動する() throws Exception {
         // トップページにアクセス
         mockMvc.perform(get("/"))
                 .andExpect(status().isOk())
