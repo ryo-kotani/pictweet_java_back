@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS tweets (
     id SERIAL NOT NULL,
     text VARCHAR(256) NOT NULL,
     image VARCHAR(256),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     user_id INT NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (user_id) REFERENCES users(id)

@@ -21,6 +21,7 @@ import in.tech_camp.pictweet.entity.CommentEntity;
 import in.tech_camp.pictweet.form.CommentForm;
 import in.tech_camp.pictweet.form.SearchForm;
 import in.tech_camp.pictweet.form.TweetForm;
+import in.tech_camp.pictweet.repository.CommentRepository;
 import in.tech_camp.pictweet.repository.TweetRepository;
 import in.tech_camp.pictweet.repository.UserRepository;
 import in.tech_camp.pictweet.validation.GroupOrder;
