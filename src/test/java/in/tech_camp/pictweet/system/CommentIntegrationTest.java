@@ -2,6 +2,7 @@ package in.tech_camp.pictweet.system;
 
 import java.util.List;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -18,8 +19,10 @@ import org.springframework.test.web.servlet.MvcResult;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
 import in.tech_camp.pictweet.PicTweetApplication;
 import in.tech_camp.pictweet.entity.CommentEntity;
@@ -86,5 +89,11 @@ public class CommentIntegrationTest {
     // 投稿されたツイートを取得
     List<TweetEntity> tweets = tweetRepository.findAll();
     Integer tweetId = tweets.get(0).getId();
+
+     // 詳細ページに遷移
+     mockMvc.perform(get("/tweets/{tweetId}", tweetId)
+             .session((MockHttpSession) session))
+             .andExpect(status().isOk())
+             .andExpect(content().string(containsString(tweetText))); // ツイートの内容が含まれているか確認
 }
 }
