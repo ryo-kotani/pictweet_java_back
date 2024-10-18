@@ -7,6 +7,7 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.context.ActiveProfiles;
 
 import in.tech_camp.pictweet.form.CommentForm;
 import in.tech_camp.pictweet.validation.ValidGroup1;
@@ -16,6 +17,7 @@ import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 
+@ActiveProfiles("test")
 public class CommentFormUnitTest {
 
     private Validator validator;
@@ -45,7 +47,7 @@ public class CommentFormUnitTest {
 
             Set<ConstraintViolation<CommentForm>> violations = validator.validate(commentForm, ValidGroup1.class);
             assertEquals(1, violations.size());
-            assertEquals("Text can't be blank", violations.iterator().next().getMessage());
+            assertEquals("Comment can't be blank", violations.iterator().next().getMessage());
         }
     }
 }

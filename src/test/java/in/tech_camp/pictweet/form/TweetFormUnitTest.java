@@ -16,7 +16,7 @@ import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 
-@SpringBootTest
+
 @ActiveProfiles("test")
 public class TweetFormUnitTest {
 

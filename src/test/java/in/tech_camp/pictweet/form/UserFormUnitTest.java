@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import static org.mockito.Mockito.verify;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.validation.BindingResult;
 
@@ -22,7 +21,6 @@ import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 
 @ActiveProfiles("test")
-@SpringBootTest
 public class UserFormUnitTest {
     private UserForm userForm;
     private Validator validator;

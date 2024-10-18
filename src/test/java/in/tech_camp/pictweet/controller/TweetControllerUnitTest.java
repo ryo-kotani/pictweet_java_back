@@ -7,6 +7,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.when;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -32,11 +33,16 @@ public class TweetControllerUnitTest {
     @InjectMocks
     private TweetController tweetController;
 
+    private Model model;
+    private SearchForm form;
+
+    @BeforeEach
+    public void setUp() {
+        form = new SearchForm();
+        model = new ExtendedModelMap();
+    }
     @Test
     public void 投稿一覧機能にリクエストすると正常にレスポンスが返ってくる() {
-        SearchForm form = new SearchForm();
-        Model model = new ExtendedModelMap();
-
         String result = tweetController.showTweets(model, form);
 
         assertThat(result, is("tweets/index"));
@@ -58,9 +64,8 @@ public class TweetControllerUnitTest {
 
         when(tweetRepository.findAll()).thenReturn(expectedTweetList);
 
-        SearchForm form = new SearchForm();
-        Model model = new ExtendedModelMap();
         tweetController.showTweets(model, form);
         assertThat(model.getAttribute("tweetList"), is(expectedTweetList));
     }
+
 }
