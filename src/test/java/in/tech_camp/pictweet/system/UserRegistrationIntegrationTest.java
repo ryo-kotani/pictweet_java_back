@@ -2,28 +2,24 @@ package in.tech_camp.pictweet.system;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-
-import in.tech_camp.pictweet.PicTweetApplication;
-
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
+import in.tech_camp.pictweet.PicTweetApplication;
 import in.tech_camp.pictweet.entity.UserEntity;
 import in.tech_camp.pictweet.factory.UserFormFactory;
 import in.tech_camp.pictweet.form.UserForm;
@@ -62,6 +58,9 @@ public class UserRegistrationIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("users/register"));
 
+        List<UserEntity> userBeforeDeletion = userRepository.findAll();
+        Integer initialCount = userBeforeDeletion.size();
+
         // 新規登録情報を送信
         mockMvc.perform(post("/register")
                 // ユーザー情報を入力する
@@ -76,9 +75,9 @@ public class UserRegistrationIntegrationTest {
                 .andExpect(status().isFound());
 
         // 新規登録に成功するとユーザーモデルのカウントが1上がる
-        List<UserEntity> users = userRepository.findAll();
-        Integer count = users.size();
-        assertEquals(1, count);
+        List<UserEntity> userAfterDeletion = userRepository.findAll();
+        Integer afterCount = userAfterDeletion.size();
+        assertEquals(initialCount + 1, afterCount);
     }
 
     @Test
@@ -94,6 +93,9 @@ public class UserRegistrationIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("users/register"));
 
+        List<UserEntity> userBeforeDeletion = userRepository.findAll();
+        Integer initialCount = userBeforeDeletion.size();
+
         // 誤った情報を使って新規登録を試みる
         mockMvc.perform(post("/register")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
@@ -106,8 +108,8 @@ public class UserRegistrationIntegrationTest {
                 .andExpect(view().name("users/register")); // 新規登録ページに戻ることを確認
 
         // 新規登録に失敗したらユーザーモデルのカウントは上がらない
-        List<UserEntity> users = userRepository.findAll();
-        Integer count = users.size();
-        assertEquals(0, count);
+        List<UserEntity> userAfterDeletion = userRepository.findAll();
+        Integer afterCount = userAfterDeletion.size();
+        assertEquals(initialCount, afterCount);
     }
 }
