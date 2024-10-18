@@ -1,5 +1,8 @@
 package in.tech_camp.pictweet.controller;
 
+import java.util.Arrays;
+import java.util.List;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.when;
@@ -31,7 +34,6 @@ public class TweetControllerUnitTest {
 
     @Test
     public void 投稿一覧機能にリクエストすると正常にレスポンスが返ってくる() {
-        // モックの設定（等）
         SearchForm form = new SearchForm();
         Model model = new ExtendedModelMap();
 
@@ -57,9 +59,8 @@ public class TweetControllerUnitTest {
         when(tweetRepository.findAll()).thenReturn(expectedTweetList);
 
         SearchForm form = new SearchForm();
-
-        String result = tweetController.showTweets(model, form);
-
-        assertThat(result, is("tweets/index"));
+        Model model = new ExtendedModelMap();
+        tweetController.showTweets(model, form);
+        assertThat(model.getAttribute("tweetList"), is(expectedTweetList));
     }
 }
