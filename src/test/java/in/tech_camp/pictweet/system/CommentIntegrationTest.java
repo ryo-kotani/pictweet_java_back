@@ -115,5 +115,10 @@ public class CommentIntegrationTest {
      Integer commentCount = comments.size();
      assertEquals(1, commentCount); // 初回なのでカウントは1
 
+    // 詳細ページに再度アクセスして、コメント内容を確認
+    mockMvc.perform(get("/tweets/{tweetId}", tweetId)
+    .session((MockHttpSession) session))
+    .andExpect(status().isOk())
+    .andExpect(content().string(containsString(commentText))); // コメント内容が含まれているか確認
   }
 }
