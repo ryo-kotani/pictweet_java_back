@@ -4,6 +4,8 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -233,5 +235,65 @@ public class TweetIntegrationTest {
                .andExpect(status().isOk())
                .andExpect(content().string(not(containsString("編集")))); // 編集リンクがないことを確認
    }
+
+   //
+   //ツイート削除機能
+   //
+   @Test
+   public void ログインしたユーザーは自らが投稿したツイートの削除ができる() throws Exception {
+     // ツイートを投稿したユーザーでログインする
+     MvcResult loginResult = mockMvc.perform(post("/login")
+     .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+     .param("username", userForm.getEmail())
+     .param("password", userForm.getPassword())
+     .with(csrf()))
+     .andExpect(status().isFound())
+     .andExpect(redirectedUrl("/"))
+     .andReturn();
+
+     HttpSession session = loginResult.getRequest().getSession();
+
+     // ツイートを投稿
+     String tweetText = "テスト3";
+     mockMvc.perform(post("/tweets")
+             .param("text", tweetText)
+             .param("image", "test.png")
+             .with(csrf())
+             .session((MockHttpSession) session))
+             .andExpect(status().isFound())
+             .andExpect(redirectedUrl("/"));
+
+     // 削除リンクが表示されることを確認
+     mockMvc.perform(get("/").session((MockHttpSession) session))
+             .andExpect(status().isOk())
+             .andExpect(content().string(containsString("削除"))); // ツイートに「削除」リンクがあるかの確認
+
+     List<TweetEntity> tweets = tweetRepository.findByUserId(userEntity.getId());
+
+
+     // ツイートを削除
+     List<TweetEntity> tweetsBeforeDeletion = tweetRepository.findAll();
+     Integer initialCount = tweetsBeforeDeletion.size();
+
+
+     mockMvc.perform(post("/tweets/{tweetId}/delete", userEntity.getId(), tweets.get(0).getId()) // ツイートIDを取得して削除
+             .with(csrf())
+             .session((MockHttpSession) session))
+             .andExpect(status().isFound())
+             .andExpect(redirectedUrl("/"));
+
+
+     // レコードの数が1減ったことを確認
+     List<TweetEntity> tweetsAfterDeletion = tweetRepository.findAll();
+     Integer afterCount = tweetsAfterDeletion.size();
+     assertEquals(initialCount - 1, afterCount);
+
+
+     // トップページにツイートの内容が存在しないことを確認
+     mockMvc.perform(get("/"))
+             .andExpect(status().isOk())
+             .andExpect(content().string(not(containsString(tweetText))));
+   }
+
 
 }
