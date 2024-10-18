@@ -30,6 +30,7 @@ import in.tech_camp.pictweet.entity.TweetEntity;
 import in.tech_camp.pictweet.entity.UserEntity;
 import in.tech_camp.pictweet.factory.UserFormFactory;
 import in.tech_camp.pictweet.form.UserForm;
+import in.tech_camp.pictweet.repository.CommentRepository;
 import in.tech_camp.pictweet.repository.TweetRepository;
 import in.tech_camp.pictweet.service.UserService;
 import jakarta.servlet.http.HttpSession;
@@ -49,6 +50,9 @@ public class CommentIntegrationTest {
 
   @Autowired
   private TweetRepository tweetRepository;
+
+  @Autowired
+  private CommentRepository commentRepository;
 
   @BeforeEach
   public void setup() {
@@ -105,5 +109,11 @@ public class CommentIntegrationTest {
             .session((MockHttpSession) session))
             .andExpect(status().isFound())
             .andExpect(redirectedUrl("/tweets/" + tweetId)); // 詳細ページにリダイレクトされることを確認
+
+     // コメントモデルのカウントが1増加しているか確認
+     List<CommentEntity>  comments = commentRepository.findByTweetId(tweets.get(0).getId()); // コメントのカウントを取得するメソッドが必要
+     Integer commentCount = comments.size();
+     assertEquals(1, commentCount); // 初回なのでカウントは1
+
   }
 }
