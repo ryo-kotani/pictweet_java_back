@@ -2,6 +2,7 @@ package in.tech_camp.pictweet.system;
 
 import java.util.List;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -24,6 +25,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import in.tech_camp.pictweet.entity.UserEntity;
+import in.tech_camp.pictweet.factory.UserFormFactory;
+import in.tech_camp.pictweet.form.UserForm;
 import in.tech_camp.pictweet.repository.UserRepository;
 
 @ActiveProfiles("test")
@@ -36,6 +39,14 @@ public class UserRegistrationIntegrationTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    private UserForm userForm;
+
+    @BeforeEach
+    public void setup() {
+        // テスト用のユーザー情報をセットアップ
+        userForm = UserFormFactory.createUser();
+    }
 
     @Test
     void
@@ -54,13 +65,15 @@ public class UserRegistrationIntegrationTest {
 
         // 新規登録情報を送信
         mockMvc.perform(post("/register")
+                // ユーザー情報を入力する
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                .param("nickname", "太郎")
-                .param("email", "test@example.com")
-                .param("password", "testPassword")
-                .param("passwordConfirmation", "testPassword")
+                .param("nickname", userForm.getNickname())
+                .param("email", userForm.getEmail())
+                .param("password", userForm.getPassword())
+                .param("passwordConfirmation", userForm.getPasswordConfirmation())
                 .with(csrf())) // CSRFトークンを含める
-                .andExpect(redirectedUrl("/"))  // トップページにリダイレクトされることを確認
+                // トップページにリダイレクトされることを確認
+                .andExpect(redirectedUrl("/"))
                 .andExpect(status().isFound());
 
         // 新規登録に成功するとユーザーモデルのカウントが1上がる
@@ -86,9 +99,9 @@ public class UserRegistrationIntegrationTest {
         mockMvc.perform(post("/register")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .param("nickname", "")
-                .param("email", "test@example.com")
-                .param("password", "testPassword")
-                .param("passwordConfirmation", "testPassword")
+                .param("email", userForm.getEmail())
+                .param("password", userForm.getPassword())
+                .param("passwordConfirmation", userForm.getPasswordConfirmation())
                 .with(csrf())) // CSRFトークンを含める
                 .andExpect(status().isOk()) // 新規登録ページが表示されることを確認
                 .andExpect(view().name("users/register")); // 新規登録ページに戻ることを確認
@@ -96,6 +109,6 @@ public class UserRegistrationIntegrationTest {
         // 新規登録に失敗したらユーザーモデルのカウントは上がらない
         List<UserEntity> users = userRepository.findAll();
         Integer count = users.size();
-        assertEquals(1, count);
+        assertEquals(0, count);
     }
 }
