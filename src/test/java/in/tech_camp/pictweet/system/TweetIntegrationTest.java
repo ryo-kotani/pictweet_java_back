@@ -378,4 +378,48 @@ public class TweetIntegrationTest {
              .andExpect(content().string(containsString(tweetText))) // ツイートの内容が含まれているか確認
              .andExpect(content().string(containsString("コメントする"))); // コメント用のフォームが存在することを確認
  }
+ @Test
+ public void ログインしていない状態でツイート詳細ページに遷移できるもののコメント投稿欄が表示されない() throws Exception {
+     // ユーザーがログインする
+     MvcResult loginResult = mockMvc.perform(post("/login")
+     .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+     .param("username", userForm.getEmail())
+     .param("password", userForm.getPassword())
+     .with(csrf()))
+     .andExpect(status().isFound())
+     .andExpect(redirectedUrl("/"))
+     .andReturn();
+
+
+     HttpSession session = loginResult.getRequest().getSession();
+
+
+     // ツイートを投稿
+     String tweetText = "テスト6";
+     mockMvc.perform(post("/tweets")
+             .param("text", tweetText)
+             .param("image", "test.png")
+             .with(csrf())
+             .session((MockHttpSession) session))
+             .andExpect(status().isFound())
+             .andExpect(redirectedUrl("/"));
+
+
+     // トップページに移動する
+     mockMvc.perform(get("/"))
+             .andExpect(status().isOk())
+             .andExpect(content().string(containsString("詳細"))); // ツイートに「詳細」へのリンクがあることを確認
+
+
+     // 投稿されたツイートのリストを取得
+     List<TweetEntity> tweets = tweetRepository.findAll(); // ツイートを取得
+
+
+     // 詳細ページに遷移
+     mockMvc.perform(get("/tweets/{tweetId}", tweets.get(0).getId())) // ツイートIDで詳細ページに遷移
+             .andExpect(status().isOk())
+             .andExpect(content().string(containsString(tweets.get(0).getText()))) // ツイート内容の確認
+             .andExpect(content().string(not(containsString("コメントする")))) // フォームが存在しないことを確認
+             .andExpect(content().string(containsString("コメントの投稿には新規登録/ログインが必要です"))); // メッセージが表示されていることを確認
+ }
 }
