@@ -17,7 +17,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
-    public void registerNewUser(UserEntity userEntity){
+    public void createUser(UserEntity userEntity){
         String password = userEntity.getPassword();
         String encodedPassword = passwordEncoder.encode(password);
 

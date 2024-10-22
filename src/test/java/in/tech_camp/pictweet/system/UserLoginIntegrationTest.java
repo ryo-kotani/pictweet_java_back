@@ -47,7 +47,7 @@ public class UserLoginIntegrationTest {
     userEntity.setNickname(userForm.getNickname());
     userEntity.setPassword(userForm.getPassword());
 
-    userService.registerNewUser(userEntity);
+    userService.createUser(userEntity);
   }
 
   @Nested

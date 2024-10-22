@@ -64,7 +64,7 @@ public class TweetIntegrationTest {
         userEntity.setNickname(userForm.getNickname());
         userEntity.setPassword(userForm.getPassword());
 
-        userService.registerNewUser(userEntity);
+        userService.createUser(userEntity);
     }
    @Test
    public void ログインしたユーザーは新規投稿できる() throws Exception {
@@ -157,7 +157,7 @@ public class TweetIntegrationTest {
        anotherUser.setEmail(anotherUserForm.getEmail());
        anotherUser.setNickname(anotherUserForm.getNickname());
        anotherUser.setPassword(anotherUserForm.getPassword());
-       userService.registerNewUser(anotherUser);
+       userService.createUser(anotherUser);
 
        //ログインしたユーザー以外の投稿したツイートを作成
        TweetForm tweetForm = TweetFormFactory.createTweet();
@@ -240,7 +240,7 @@ public class TweetIntegrationTest {
        anotherUser.setEmail(anotherUserForm.getEmail());
        anotherUser.setNickname(anotherUserForm.getNickname());
        anotherUser.setPassword(anotherUserForm.getPassword());
-       userService.registerNewUser(anotherUser);
+       userService.createUser(anotherUser);
 
        // ツイートの作成
        String tweetText = "テスト4";

@@ -62,7 +62,7 @@ public class CommentIntegrationTest {
       userEntity.setNickname(userForm.getNickname()); // 必要であれば他のフィールドもセット
       userEntity.setPassword(userForm.getPassword());
 
-      userService.registerNewUser(userEntity);
+      userService.createUser(userEntity);
   }
 
   @Test

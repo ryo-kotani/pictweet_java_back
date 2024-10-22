@@ -52,6 +52,7 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	testCompileOnly 'org.projectlombok:lombok' // テスト用
   testAnnotationProcessor 'org.projectlombok:lombok' // テスト用
+	implementation 'org.jsoup:jsoup:1.15.3'
 	// Facker
 	implementation 'org.yaml:snakeyaml:1.29'
 	implementation 'com.github.javafaker:javafaker:1.0.2'
