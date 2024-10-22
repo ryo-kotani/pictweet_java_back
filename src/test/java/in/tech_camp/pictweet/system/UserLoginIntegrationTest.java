@@ -83,7 +83,7 @@ public class UserLoginIntegrationTest {
         .andExpect(view().name("tweets/index"))
         // ログアウトボタンが表示されることを確認する
         .andExpect(content().string(org.hamcrest.Matchers.containsString("logout-btn")))
-        // 新規登録ページへ遷移するボタンやログインページへ遷移するボタンが表示されていないことを確認
+        // 新規登録ページへ遷移するボタンが表示されていないことを確認
         .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("新規登録"))));
     }
   }
@@ -93,10 +93,29 @@ public class UserLoginIntegrationTest {
     @Test
     public void 保存されているユーザーの情報と合致しないとログインができない() throws Exception {
       // トップページに移動する
-      // トップページにログインページへ遷移するボタンがあることを確認する
+      mockMvc.perform(get("/"))
+        .andExpect(status().isOk())
+        .andExpect(view().name("tweets/index"))
+        // トップページにログインページへ遷移するボタンがあることを確認する
+        .andExpect(content().string(org.hamcrest.Matchers.containsString("ログイン")));
       // ログインページに遷移する
+      mockMvc.perform(get("/login"))
+        .andExpect(status().isOk())
+        .andExpect(view().name("users/login"));
+
       // 間違ったユーザー情報でログインを試みる
+      mockMvc.perform(post("/login")
+        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+        .param("username", "test")
+        .param("password", "")
+        .with(csrf()))
+      .andExpect(redirectedUrl("/login?error"))
+      .andExpect(status().isFound());
+
       // 再度ログインページにリダイレクトされることを確認する
+      mockMvc.perform(get("/login"))
+        .andExpect(status().isOk())
+        .andExpect(view().name("users/login"));
     }
   }
 }
