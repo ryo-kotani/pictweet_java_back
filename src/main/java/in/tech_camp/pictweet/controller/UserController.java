@@ -60,7 +60,7 @@ public class UserController {
         userEntity.setEmail(userForm.getEmail());
         userEntity.setPassword(userForm.getPassword());
 
-        userService.registerNewUser(userEntity);
+        userService.createUser(userEntity);
         return "redirect:/";
     }
 

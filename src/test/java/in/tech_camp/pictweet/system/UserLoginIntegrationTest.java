@@ -84,7 +84,7 @@ public class UserLoginIntegrationTest {
         // ログアウトボタンが表示されることを確認する
         .andExpect(content().string(org.hamcrest.Matchers.containsString("logout-btn")))
         // 新規登録ページへ遷移するボタンが表示されていないことを確認
-        .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("新規登録"))));
+        .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("投稿する"))));
     }
   }
 

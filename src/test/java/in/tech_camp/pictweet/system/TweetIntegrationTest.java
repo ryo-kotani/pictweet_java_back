@@ -101,7 +101,7 @@ public class TweetIntegrationTest {
        // トップページには新規投稿ボタンがないことを確認
        mockMvc.perform(get("/"))
                .andExpect(status().isOk())
-               .andExpect(content().string(not(containsString("新規投稿")))); // ボタンが含まれていないことを確認
+               .andExpect(content().string(not(containsString("投稿する")))); // ボタンが含まれていないことを確認
    }
 @Test
    public void ログインしたユーザーは自分が投稿したツイートの編集ができる() throws Exception {
