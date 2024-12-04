@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import in.tech_camp.pictweet.custom_user.CustomUserDetail;
 import in.tech_camp.pictweet.entity.UserEntity;
 import in.tech_camp.pictweet.repository.UserRepository;
+
 import lombok.AllArgsConstructor;
 
 
@@ -27,3 +28,4 @@ public class UserAuthenticationService implements UserDetailsService {
         return new CustomUserDetail(userEntity);
     }
 }
+

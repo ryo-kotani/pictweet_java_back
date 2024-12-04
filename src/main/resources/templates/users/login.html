@@ -10,31 +10,27 @@
 <div th:insert="~{header :: header}"></div>
 
 <div class="contents row">
-    <div class="container">
-        <h2>Log in</h2>
-        <p th:if="${param.error}" class="login-error" th:text="${loginError}"></p>
+  <div class="container">
+    <h2>Log in</h2>
+    <p th:if="${loginError}" class="login-error" th:text="${loginError}"></p>
 
-        <!-- Spring Securityの/loginエンドポイントに対するPOSTリクエストを行うフォーム -->
-        <form method="post" th:action="@{/login}" class="new_user">
+    <form method="post" th:action="@{/login}" class="new_user">
 
-            <div class="field">
-                <label class="column-title">Email</label><br />
-                <!-- usernameは通常、emailにマップされます -->
-                <input type="text" id="email" name="email" autofocus="autofocus" required="required" />
-            </div>
+      <div class="field">
+        <label class="column-title">Email</label><br />
+        <input type="text" id="email" name="email" autofocus="autofocus" required="required" />
+      </div>
 
+      <div class="field">
+        <label class="password">Password</label><br />
+        <input type="password" name="password" required="required" autocomplete="off" />
+      </div>
 
-            <div class="field">
-                <label class="password">Password</label><br />
-                <input type="password" name="password" required="required" autocomplete="off" />
-            </div>
-
-
-            <div class="actions">
-                <input type="submit">
-            </div>
-        </form>
-    </div>
+      <div class="actions">
+        <input type="submit" value="Log in">
+      </div>
+    </form>
+  </div>
 </div>
 
 <div th:insert="~{footer :: footer}"></div>

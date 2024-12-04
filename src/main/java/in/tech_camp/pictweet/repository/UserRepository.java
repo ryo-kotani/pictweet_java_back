@@ -14,26 +14,26 @@ import in.tech_camp.pictweet.entity.UserEntity;
 
 @Mapper
 public interface UserRepository {
-    @Select("SELECT * FROM users WHERE id = #{id}")
-    @Results(value = {
-    @Result(property = "id", column = "id"),
-    @Result(property = "tweets", column = "id",
+  @Insert("INSERT INTO users (nickname, email, password) VALUES (#{nickname}, #{email}, #{password})")
+  @Options(useGeneratedKeys = true, keyProperty = "id")
+  void insert(UserEntity user);
+
+  @Select("SELECT EXISTS(SELECT 1 FROM users WHERE email = #{email})")
+  boolean existsByEmail(String email);
+
+  @Select("SELECT * FROM users WHERE email = #{email}")
+  UserEntity findByEmail(String email);
+
+  @Select("SELECT * FROM users WHERE id = #{id}")
+  @Results(value = {
+    @Result(property = "id", column = "id"), 
+    @Result(property = "tweets", column = "id", 
             many = @Many(select = "in.tech_camp.pictweet.repository.TweetRepository.findByUserId")),
-    @Result(property = "comments", column = "id",
+    @Result(property = "comments", column = "id", 
             many = @Many(select = "in.tech_camp.pictweet.repository.CommentRepository.findByUserId"))
-    })
-    UserEntity findById(Integer id);
+  })
+  UserEntity findById(Integer id);
 
-    @Select("SELECT * FROM users WHERE email = #{email}")
-    UserEntity findByEmail(String email);
-
-    @Select("SELECT * FROM users")
-    List<UserEntity> findAll();
-
-    @Select("SELECT EXISTS(SELECT 1 FROM users WHERE email = #{email})")
-    boolean existsByEmail(String email);
-
-    @Insert("INSERT INTO users (nickname, email, password) VALUES (#{nickname}, #{email}, #{password})")
-    @Options(useGeneratedKeys = true, keyProperty = "id")
-    void insert(UserEntity user);
+  @Select("SELECT * FROM users")
+  List<UserEntity> findAll();
 }

@@ -19,15 +19,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
-import in.tech_camp.pictweet.PicTweetApplication;
+import in.tech_camp.pictweet.PictweetApplication;
 import in.tech_camp.pictweet.entity.UserEntity;
 import in.tech_camp.pictweet.factory.UserFormFactory;
 import in.tech_camp.pictweet.form.UserForm;
 import in.tech_camp.pictweet.service.UserService;
-import jakarta.servlet.http.HttpSession;
 
 @ActiveProfiles("test")
-@SpringBootTest(classes = PicTweetApplication.class)
+@SpringBootTest(classes = PictweetApplication.class)
 @AutoConfigureMockMvc
 public class UserLoginIntegrationTest {
   @Autowired
@@ -47,7 +46,7 @@ public class UserLoginIntegrationTest {
     userEntity.setNickname(userForm.getNickname());
     userEntity.setPassword(userForm.getPassword());
 
-    userService.createUser(userEntity);
+    userService.createUserWithEncryptedPassword(userEntity);
   }
 
   @Nested
@@ -62,7 +61,7 @@ public class UserLoginIntegrationTest {
         .andExpect(content().string(org.hamcrest.Matchers.containsString("ログイン")));
 
       // ログインページに遷移する
-      mockMvc.perform(get("/loginForm"))
+      mockMvc.perform(get("/users/login"))
         .andExpect(status().isOk())
         .andExpect(view().name("users/login"));
 
@@ -76,15 +75,15 @@ public class UserLoginIntegrationTest {
         .andExpect(redirectedUrl("/"))
         .andReturn();
 
-      HttpSession session = loginResult.getRequest().getSession();
+      MockHttpSession session = (MockHttpSession)loginResult.getRequest().getSession();
       // トップページへ遷移することを確認する
-      mockMvc.perform(get("/").session((MockHttpSession) session))
+      mockMvc.perform(get("/").session(session))
         .andExpect(status().isOk())
         .andExpect(view().name("tweets/index"))
         // ログアウトボタンが表示されることを確認する
         .andExpect(content().string(org.hamcrest.Matchers.containsString("logout-btn")))
         // 新規登録ページへ遷移するボタンが表示されていないことを確認
-        .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("投稿する"))));
+        .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("新規登録"))));
     }
   }
 
@@ -99,7 +98,7 @@ public class UserLoginIntegrationTest {
         // トップページにログインページへ遷移するボタンがあることを確認する
         .andExpect(content().string(org.hamcrest.Matchers.containsString("ログイン")));
       // ログインページに遷移する
-      mockMvc.perform(get("/login"))
+      mockMvc.perform(get("/users/login"))
         .andExpect(status().isOk())
         .andExpect(view().name("users/login"));
 
@@ -113,7 +112,7 @@ public class UserLoginIntegrationTest {
       .andExpect(status().isFound());
 
       // 再度ログインページにリダイレクトされることを確認する
-      mockMvc.perform(get("/login"))
+      mockMvc.perform(get("/users/login"))
         .andExpect(status().isOk())
         .andExpect(view().name("users/login"));
     }

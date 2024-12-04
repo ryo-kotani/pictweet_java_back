@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="ja">
 <head>
   <meta charset="UTF-8">
   <link th:href="@{/css/style.css}" rel="stylesheet" type="text/css">
@@ -12,15 +12,11 @@
 <div class="contents row">
   <div class="container">
     <h3>編集する</h3>
-    <div th:if="${errorMessages}" th:each="error : ${errorMessages}">
-      <div th:text="${error}"></div>
-    </div>
-    <form  th:action="@{/tweets/{tweetId}/update(tweetId=${tweetEntity.getId()})}" th:object="${tweetEntity}" th:method="post">
-      <div th:insert="~{tweets/form :: form}"></div>
-    </form>
+    <div th:replace="~{tweets/form :: form(actionUrl=@{/tweets/{tweetId}/update(tweetId=${tweetId})}, tweetForm=${tweetForm}, errorMessages=${errorMessages})}"></div>
   </div>
 </div>
 
+<div th:insert="~{footer :: footer}"></div>
 
 </body>
 </html>

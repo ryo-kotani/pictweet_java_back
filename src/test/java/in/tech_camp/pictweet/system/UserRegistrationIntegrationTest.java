@@ -20,14 +20,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
-import in.tech_camp.pictweet.PicTweetApplication;
+import in.tech_camp.pictweet.PictweetApplication;
 import in.tech_camp.pictweet.entity.UserEntity;
 import in.tech_camp.pictweet.factory.UserFormFactory;
 import in.tech_camp.pictweet.form.UserForm;
 import in.tech_camp.pictweet.repository.UserRepository;
 
 @ActiveProfiles("test")
-@SpringBootTest(classes = PicTweetApplication.class)
+@SpringBootTest(classes = PictweetApplication.class)
 @AutoConfigureMockMvc
 public class UserRegistrationIntegrationTest {
 
@@ -56,15 +56,15 @@ public class UserRegistrationIntegrationTest {
                         .andExpect(content().string(org.hamcrest.Matchers.containsString("新規登録"))); // サインアップボタンが存在するかチェック
 
                 // 新規登録ページにアクセス
-                mockMvc.perform(get("/registerForm"))
+                mockMvc.perform(get("/users/sign_up"))
                         .andExpect(status().isOk())
-                        .andExpect(view().name("users/register"));
+                        .andExpect(view().name("users/signUp"));
 
                 List<UserEntity> userBeforeDeletion = userRepository.findAll();
                 Integer initialCount = userBeforeDeletion.size();
 
                 // 新規登録情報を送信
-                mockMvc.perform(post("/register")
+                mockMvc.perform(post("/user")
                         // ユーザー情報を入力する
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("nickname", userForm.getNickname())
@@ -94,15 +94,15 @@ public class UserRegistrationIntegrationTest {
                         // トップページにサインアップページへ遷移するボタンが存在することを確認
                         .andExpect(content().string(org.hamcrest.Matchers.containsString("新規登録"))); // サインアップボタンが存在するかチェック
                 // 新規登録ページにアクセス
-                mockMvc.perform(get("/registerForm"))
+                mockMvc.perform(get("/users/sign_up"))
                         .andExpect(status().isOk())
-                        .andExpect(view().name("users/register"));
+                        .andExpect(view().name("users/signUp"));
 
                 List<UserEntity> userBeforeDeletion = userRepository.findAll();
                 Integer initialCount = userBeforeDeletion.size();
 
                 // 誤った情報を使って新規登録を試みる
-                mockMvc.perform(post("/register")
+                mockMvc.perform(post("/user")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("nickname", "")
                         .param("email", userForm.getEmail())
@@ -110,7 +110,7 @@ public class UserRegistrationIntegrationTest {
                         .param("passwordConfirmation", userForm.getPasswordConfirmation())
                         .with(csrf())) // CSRFトークンを含める
                         .andExpect(status().isOk()) // 新規登録ページが表示されることを確認
-                        .andExpect(view().name("users/register")); // 新規登録ページに戻ることを確認
+                        .andExpect(view().name("users/signUp")); // 新規登録ページに戻ることを確認
 
                 // 新規登録に失敗したらユーザーモデルのカウントは上がらない
                 List<UserEntity> userAfterDeletion = userRepository.findAll();

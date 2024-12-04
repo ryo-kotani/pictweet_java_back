@@ -1,5 +1,5 @@
 package in.tech_camp.pictweet.validation;
 
-public interface ValidGroup2 {
-
+public interface ValidationPriority1 {
+  
 }

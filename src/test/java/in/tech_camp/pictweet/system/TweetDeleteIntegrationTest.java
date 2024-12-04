@@ -2,22 +2,14 @@ package in.tech_camp.pictweet.system;
 
 import java.util.List;
 
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -26,25 +18,32 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import in.tech_camp.pictweet.PicTweetApplication;
-import in.tech_camp.pictweet.entity.UserEntity;
+import in.tech_camp.pictweet.PictweetApplication;
 import in.tech_camp.pictweet.entity.TweetEntity;
-import in.tech_camp.pictweet.factory.UserFormFactory;
+import in.tech_camp.pictweet.entity.UserEntity;
 import in.tech_camp.pictweet.factory.TweetFormFactory;
-import in.tech_camp.pictweet.form.UserForm;
+import in.tech_camp.pictweet.factory.UserFormFactory;
 import in.tech_camp.pictweet.form.TweetForm;
-import in.tech_camp.pictweet.service.UserService;
+import in.tech_camp.pictweet.form.UserForm;
 import in.tech_camp.pictweet.repository.TweetRepository;
+import in.tech_camp.pictweet.service.UserService;
+import static in.tech_camp.pictweet.support.LoginSupport.login;
 
 @ActiveProfiles("test")
-@SpringBootTest(classes = PicTweetApplication.class)
+@SpringBootTest(classes = PictweetApplication.class)
 @AutoConfigureMockMvc
 public class TweetDeleteIntegrationTest {
-    private UserForm userForm1;
+  private UserForm userForm1;
   private UserEntity userEntity1;
 
   private UserForm userForm2;
@@ -72,14 +71,14 @@ public class TweetDeleteIntegrationTest {
     userEntity1.setEmail(userForm1.getEmail());
     userEntity1.setNickname(userForm1.getNickname());
     userEntity1.setPassword(userForm1.getPassword());
-    userService.createUser(userEntity1);
+    userService.createUserWithEncryptedPassword(userEntity1);
 
     userForm2 = UserFormFactory.createUser();
     userEntity2 = new UserEntity();
     userEntity2.setEmail(userForm2.getEmail());
     userEntity2.setNickname(userForm2.getNickname());
     userEntity2.setPassword(userForm2.getPassword());
-    userService.createUser(userEntity2);
+    userService.createUserWithEncryptedPassword(userEntity2);
 
     tweetForm1 = TweetFormFactory.createTweet();
     tweetEntity1 = new TweetEntity();
@@ -101,14 +100,8 @@ public class TweetDeleteIntegrationTest {
     @Test
     public void ログインしたユーザーは自らが投稿したツイートの削除ができる() throws Exception {
       // ツイート1を投稿したユーザーでログインする
-      MvcResult loginResult = mockMvc.perform(post("/login")
-          .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-          .param("email", userForm1.getEmail())
-          .param("password", userForm1.getPassword())
-          .with(csrf()))
-          .andReturn();
+      MockHttpSession session = login(mockMvc, userForm1);
 
-      MockHttpSession session  = (MockHttpSession)loginResult.getRequest().getSession();
       assertNotNull(session);
 
       // ツイート1に「削除」へのリンクがあることを確認する
@@ -122,8 +115,8 @@ public class TweetDeleteIntegrationTest {
       assertNotNull(deleteButtonElement);
       assertEquals("削除", deleteButtonElement.val());
 
-      List<TweetEntity> tweetsBeforeDeletion = tweetRepository.findAll();
-      Integer initialCount = tweetsBeforeDeletion.size();
+      List<TweetEntity> tweetsListBeforeDeletion = tweetRepository.findAll();
+      Integer initialCount = tweetsListBeforeDeletion.size();
 
       // 投稿を削除する
       mockMvc.perform(post("/tweets/{tweetId}/delete",tweetEntity1.getId()).session(session)
@@ -132,8 +125,8 @@ public class TweetDeleteIntegrationTest {
           .andExpect(redirectedUrl("/"));
 
       // 投稿を削除するとレコードの数が1減ることを確認する
-      List<TweetEntity> tweetAfterDeletion = tweetRepository.findAll();
-      Integer afterCount = tweetAfterDeletion.size();
+      List<TweetEntity> tweetsListAfterDeletion = tweetRepository.findAll();
+      Integer afterCount = tweetsListAfterDeletion.size();
       assertEquals(initialCount - 1, afterCount);
 
       // トップページにはツイート1の内容が存在しないことを確認する（画像）
@@ -155,14 +148,7 @@ public class TweetDeleteIntegrationTest {
     @Test
     public void ログインしたユーザーは自分以外が投稿したツイートの削除ができない() throws Exception {
       // ツイート1を投稿したユーザーでログインする
-      MvcResult loginResult = mockMvc.perform(post("/login")
-          .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-          .param("email", userForm1.getEmail())
-          .param("password", userForm1.getPassword())
-          .with(csrf()))
-          .andReturn();
-
-      MockHttpSession session  = (MockHttpSession)loginResult.getRequest().getSession();
+      MockHttpSession session = login(mockMvc, userForm1);
       assertNotNull(session);
 
       // ツイート2に「削除」へのリンクがないことを確認する

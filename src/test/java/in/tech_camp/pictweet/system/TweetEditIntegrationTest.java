@@ -24,13 +24,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import in.tech_camp.pictweet.PicTweetApplication;
+import in.tech_camp.pictweet.PictweetApplication;
 import in.tech_camp.pictweet.entity.UserEntity;
 import in.tech_camp.pictweet.entity.TweetEntity;
 import in.tech_camp.pictweet.factory.UserFormFactory;
@@ -38,10 +37,11 @@ import in.tech_camp.pictweet.factory.TweetFormFactory;
 import in.tech_camp.pictweet.form.UserForm;
 import in.tech_camp.pictweet.form.TweetForm;
 import in.tech_camp.pictweet.service.UserService;
+import static in.tech_camp.pictweet.support.LoginSupport.login;
 import in.tech_camp.pictweet.repository.TweetRepository;
 
 @ActiveProfiles("test")
-@SpringBootTest(classes = PicTweetApplication.class)
+@SpringBootTest(classes = PictweetApplication.class)
 @AutoConfigureMockMvc
 public class TweetEditIntegrationTest {
   private UserForm userForm1;
@@ -72,14 +72,14 @@ public class TweetEditIntegrationTest {
     userEntity1.setEmail(userForm1.getEmail());
     userEntity1.setNickname(userForm1.getNickname());
     userEntity1.setPassword(userForm1.getPassword());
-    userService.createUser(userEntity1);
+    userService.createUserWithEncryptedPassword(userEntity1);
 
     userForm2 = UserFormFactory.createUser();
     userEntity2 = new UserEntity();
     userEntity2.setEmail(userForm2.getEmail());
     userEntity2.setNickname(userForm2.getNickname());
     userEntity2.setPassword(userForm2.getPassword());
-    userService.createUser(userEntity2);
+    userService.createUserWithEncryptedPassword(userEntity2);
 
     tweetForm1 = TweetFormFactory.createTweet();
     tweetEntity1 = new TweetEntity();
@@ -101,14 +101,7 @@ public class TweetEditIntegrationTest {
     @Test
     public void ログインしたユーザーは自分が投稿したツイートの編集ができる() throws Exception {
       // ツイート1を投稿したユーザーでログインする
-      MvcResult loginResult = mockMvc.perform(post("/login")
-          .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-          .param("email", userForm1.getEmail())
-          .param("password", userForm1.getPassword())
-          .with(csrf()))
-          .andReturn();
-
-      MockHttpSession session  = (MockHttpSession)loginResult.getRequest().getSession();
+      MockHttpSession session = login(mockMvc, userForm1);
       assertNotNull(session);
 
       // ツイート1に「編集」へのリンクがあることを確認する
@@ -127,8 +120,8 @@ public class TweetEditIntegrationTest {
           .andExpect(content().string(containsString(tweetEntity1.getText())))
           .andExpect(content().string(containsString(tweetEntity1.getImage())));
 
-      List<TweetEntity> tweetBeforeDeletion = tweetRepository.findAll();
-      Integer initialCount = tweetBeforeDeletion.size();
+      List<TweetEntity> tweetsListBeforeEdit = tweetRepository.findAll();
+      Integer initialCount = tweetsListBeforeEdit.size();
 
       // 投稿内容を編集する
       mockMvc.perform(post("/tweets/{tweetId}/update" ,tweetEntity1.getId()).session(session)
@@ -139,8 +132,8 @@ public class TweetEditIntegrationTest {
           .andExpect(redirectedUrl("/"));
 
       // 編集してもtweetsテーブルのレコードの数が変わらないことを確認する
-      List<TweetEntity> tweetAfterDeletion = tweetRepository.findAll();
-      Integer afterCount = tweetAfterDeletion.size();
+      List<TweetEntity> tweetsListAfterEdit = tweetRepository.findAll();
+      Integer afterCount = tweetsListAfterEdit.size();
       assertEquals(initialCount, afterCount);
 
       // トップページには先ほど変更した内容のツイートが存在することを確認する（画像）
@@ -162,14 +155,7 @@ public class TweetEditIntegrationTest {
     @Test
     public void ログインしたユーザーは自分以外が投稿したツイートの編集画面には遷移できない() throws Exception {
       // ツイート1を投稿したユーザーでログインする
-      MvcResult loginResult = mockMvc.perform(post("/login")
-          .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-          .param("email", userForm1.getEmail())
-          .param("password", userForm1.getPassword())
-          .with(csrf()))
-          .andReturn();
-
-      MockHttpSession session  = (MockHttpSession)loginResult.getRequest().getSession();
+      MockHttpSession session = login(mockMvc, userForm1);
       assertNotNull(session);
 
       // ツイート2に「編集」へのリンクがないことを確認する

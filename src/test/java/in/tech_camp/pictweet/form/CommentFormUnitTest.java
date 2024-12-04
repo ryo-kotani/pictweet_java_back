@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ActiveProfiles;
 
 import in.tech_camp.pictweet.form.CommentForm;
-import in.tech_camp.pictweet.validation.ValidGroup1;
+import in.tech_camp.pictweet.validation.ValidationPriority1;
 import in.tech_camp.pictweet.factory.CommentFormFactory;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
@@ -35,7 +35,7 @@ public class CommentFormUnitTest {
     class コメント投稿ができる場合 {
         @Test
         public void テキストが存在していれば投稿できる () {
-          Set<ConstraintViolation<CommentForm>> violations = validator.validate(commentForm, ValidGroup1.class);
+          Set<ConstraintViolation<CommentForm>> violations = validator.validate(commentForm, ValidationPriority1.class);
           assertEquals(0, violations.size());
         }
     }
@@ -45,7 +45,7 @@ public class CommentFormUnitTest {
         public void テキストが空では投稿できない() {
             commentForm.setText("");
 
-            Set<ConstraintViolation<CommentForm>> violations = validator.validate(commentForm, ValidGroup1.class);
+            Set<ConstraintViolation<CommentForm>> violations = validator.validate(commentForm, ValidationPriority1.class);
             assertEquals(1, violations.size());
             assertEquals("Comment can't be blank", violations.iterator().next().getMessage());
         }

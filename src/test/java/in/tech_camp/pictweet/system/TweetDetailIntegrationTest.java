@@ -20,13 +20,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import in.tech_camp.pictweet.PicTweetApplication;
+import in.tech_camp.pictweet.PictweetApplication;
 import in.tech_camp.pictweet.entity.UserEntity;
 import in.tech_camp.pictweet.entity.TweetEntity;
 import in.tech_camp.pictweet.factory.UserFormFactory;
@@ -34,10 +33,11 @@ import in.tech_camp.pictweet.factory.TweetFormFactory;
 import in.tech_camp.pictweet.form.UserForm;
 import in.tech_camp.pictweet.form.TweetForm;
 import in.tech_camp.pictweet.service.UserService;
+import static in.tech_camp.pictweet.support.LoginSupport.login;
 import in.tech_camp.pictweet.repository.TweetRepository;
 
 @ActiveProfiles("test")
-@SpringBootTest(classes = PicTweetApplication.class)
+@SpringBootTest(classes = PictweetApplication.class)
 @AutoConfigureMockMvc
 public class TweetDetailIntegrationTest {
   private UserForm userForm;
@@ -62,7 +62,7 @@ public class TweetDetailIntegrationTest {
     userEntity.setEmail(userForm.getEmail());
     userEntity.setNickname(userForm.getNickname());
     userEntity.setPassword(userForm.getPassword());
-    userService.createUser(userEntity);
+    userService.createUserWithEncryptedPassword(userEntity);
 
     tweetForm = TweetFormFactory.createTweet();
     tweetEntity = new TweetEntity();
@@ -72,18 +72,10 @@ public class TweetDetailIntegrationTest {
     tweetRepository.insert(tweetEntity);
   }
 
-
   @Test
   public void ログインしたユーザーはツイート詳細ページに遷移してコメント投稿欄が表示される() throws Exception {
     // ログインする
-    MvcResult loginResult = mockMvc.perform(post("/login")
-        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-        .param("email", userForm.getEmail())
-        .param("password", userForm.getPassword())
-        .with(csrf()))
-        .andReturn();
-
-    MockHttpSession session  = (MockHttpSession)loginResult.getRequest().getSession();
+    MockHttpSession session = login(mockMvc, userForm);
     assertNotNull(session);
 
     // ツイートに「詳細」へのリンクがあることを確認する
@@ -147,5 +139,4 @@ public class TweetDetailIntegrationTest {
     mockMvc.perform(get("/tweets/{tweetId}", tweetEntity.getId()))
         .andExpect(content().string(containsString("コメントの投稿には新規登録/ログインが必要です")));
   }
-
 }

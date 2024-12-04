@@ -5,12 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import in.tech_camp.pictweet.form.TweetForm;
-import in.tech_camp.pictweet.validation.ValidGroup1;
 import in.tech_camp.pictweet.factory.TweetFormFactory;
+import in.tech_camp.pictweet.validation.ValidationPriority1;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -35,7 +33,7 @@ public class TweetFormUnitTest {
     class ツイート投稿ができる場合 {
         @Test
         public void テキストと画像が存在していれば投稿できる () {
-          Set<ConstraintViolation<TweetForm>> violations = validator.validate(tweetForm, ValidGroup1.class);
+          Set<ConstraintViolation<TweetForm>> violations = validator.validate(tweetForm, ValidationPriority1.class);
           assertEquals(0, violations.size());
         }
 
@@ -43,7 +41,7 @@ public class TweetFormUnitTest {
         public void テキストのみで投稿できる() {
             tweetForm.setImage("");
 
-            Set<ConstraintViolation<TweetForm>> violations = validator.validate(tweetForm, ValidGroup1.class);
+            Set<ConstraintViolation<TweetForm>> violations = validator.validate(tweetForm, ValidationPriority1.class);
             assertEquals(0, violations.size());
         }
     }
@@ -53,7 +51,7 @@ public class TweetFormUnitTest {
         public void テキストが空では投稿できない() {
             tweetForm.setText("");
 
-            Set<ConstraintViolation<TweetForm>> violations = validator.validate(tweetForm, ValidGroup1.class);
+            Set<ConstraintViolation<TweetForm>> violations = validator.validate(tweetForm, ValidationPriority1.class);
             assertEquals(1, violations.size());
             assertEquals("Text can't be blank", violations.iterator().next().getMessage());
         }

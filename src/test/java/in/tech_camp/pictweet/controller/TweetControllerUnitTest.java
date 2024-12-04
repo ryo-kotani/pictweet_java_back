@@ -34,16 +34,16 @@ public class TweetControllerUnitTest {
     private TweetController tweetController;
 
     private Model model;
-    private SearchForm form;
+    private SearchForm searchForm;
 
     @BeforeEach
     public void setUp() {
-        form = new SearchForm();
+        searchForm = new SearchForm();
         model = new ExtendedModelMap();
     }
     @Test
     public void 投稿一覧機能にリクエストすると正常にレスポンスが返ってくる() {
-        String result = tweetController.showTweets(model, form);
+        String result = tweetController.showIndex(model);
 
         assertThat(result, is("tweets/index"));
     }
@@ -64,8 +64,15 @@ public class TweetControllerUnitTest {
 
         when(tweetRepository.findAll()).thenReturn(expectedTweetList);
 
-        tweetController.showTweets(model, form);
-        assertThat(model.getAttribute("tweetList"), is(expectedTweetList));
+        tweetController.showIndex(model);
+        assertThat(model.getAttribute("tweets"), is(expectedTweetList));
     }
 
+    @Test
+    public void 投稿一覧機能にリクエストするとレスポンスに投稿検索フォームが存在する() {
+        SearchForm searchForm = new SearchForm();
+        Model model = new ExtendedModelMap();
+        tweetController.showIndex(model);
+        assertThat(model.getAttribute("searchForm"), is(searchForm));
+    }
 }

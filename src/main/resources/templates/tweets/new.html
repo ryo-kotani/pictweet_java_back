@@ -10,15 +10,13 @@
 <div th:insert="~{header :: header}"></div>
 
 <div class="contents row">
-    <div class="container">
-        <h3>投稿する</h3>
-        <div th:if="${errorMessages}" th:each="error : ${errorMessages}">
-            <div th:text="${error}"></div>
-        </div>
-        <form th:action="@{/tweets}" th:object="${tweetForm}" method="post">
-            <div th:insert="~{tweets/form :: form}"></div>
-        </form>
-    </div>
+  <div class="container">
+    <h3>投稿する</h3>
+    <div th:replace="~{tweets/form :: form(actionUrl=@{/tweets}, tweetForm=${tweetForm}, errorMessages=${errorMessages})}"></div>
+  </div>
 </div>
+
+<div th:insert="~{footer :: footer}"></div>
+
 </body>
 </html>

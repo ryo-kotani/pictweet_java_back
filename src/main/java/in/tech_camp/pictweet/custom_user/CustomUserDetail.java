@@ -11,10 +11,19 @@ import lombok.Data;
 
 @Data
 public class CustomUserDetail implements UserDetails {
+
     private final UserEntity user;
 
     public CustomUserDetail(UserEntity user) {
         this.user = user;
+    }
+
+    public Integer getId() {
+      return user.getId();
+    }
+
+    public String getNickname() {
+      return user.getNickname();
     }
 
     @Override
@@ -32,31 +41,23 @@ public class CustomUserDetail implements UserDetails {
         return user.getEmail();
     }
 
-    public Integer getId() {
-        return user.getId(); // IDを取得するメソッドを追加
-    }
-
-    public String getNickname() {
-        return user.getNickname(); // IDを取得するメソッドを追加
-    }
-
     @Override
     public boolean isAccountNonExpired() {
-        return true; // アカウントが期限切れでないこと
+        return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return true; // アカウントがロックされていないこと
+        return true;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return true; // 認証情報が期限切れでないこと
+        return true;
     }
 
     @Override
     public boolean isEnabled() {
-        return true; // アカウントが有効であること
+        return true;
     }
 }
