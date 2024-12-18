@@ -16,9 +16,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 import in.tech_camp.pictweet.custom_user.CustomUserDetail;
 import in.tech_camp.pictweet.entity.TweetEntity;
-import in.tech_camp.pictweet.form.TweetForm;
 import in.tech_camp.pictweet.form.CommentForm;
 import in.tech_camp.pictweet.form.SearchForm;
+import in.tech_camp.pictweet.form.TweetForm;
 import in.tech_camp.pictweet.repository.TweetRepository;
 import in.tech_camp.pictweet.repository.UserRepository;
 import in.tech_camp.pictweet.validation.ValidationOrder;
@@ -101,7 +101,7 @@ public class TweetController {
   }
 
   @PostMapping("/tweets/{tweetId}/update")
-  public String updateTweet(@ModelAttribute("tweetForm") @Validated TweetForm tweetForm,
+  public String updateTweet(@ModelAttribute("tweetForm") @Validated(ValidationOrder.class) TweetForm tweetForm,
                             BindingResult result,
                             @PathVariable("tweetId") Integer tweetId,
                             Model model) {
