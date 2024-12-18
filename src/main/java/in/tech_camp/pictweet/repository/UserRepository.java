@@ -26,11 +26,9 @@ public interface UserRepository {
 
   @Select("SELECT * FROM users WHERE id = #{id}")
   @Results(value = {
-    @Result(property = "id", column = "id"), 
+    @Result(property = "id", column = "id"),
     @Result(property = "tweets", column = "id", 
-            many = @Many(select = "in.tech_camp.pictweet.repository.TweetRepository.findByUserId")),
-    @Result(property = "comments", column = "id", 
-            many = @Many(select = "in.tech_camp.pictweet.repository.CommentRepository.findByUserId"))
+            many = @Many(select = "in.tech_camp.pictweet.repository.TweetRepository.findByUserId"))
   })
   UserEntity findById(Integer id);
 

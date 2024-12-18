@@ -20,11 +20,8 @@ public interface TweetRepository {
   
   @Select("SELECT t.*, u.id AS user_id, u.nickname AS user_nickname FROM tweets t JOIN users u ON t.user_id = u.id ORDER BY t.created_at DESC")
   @Results(value = {
-      @Result(property = "id", column = "id"),
-      @Result(property = "user.id", column = "user_id"),
-      @Result(property = "user.nickname", column = "user_nickname"),
-      @Result(property = "comments", column = "id", 
-              many = @Many(select = "in.tech_camp.pictweet.repository.CommentRepository.findByTweetId"))
+    @Result(property = "user", column = "user_id",
+            one = @One(select = "in.tech_camp.pictweet.repository.UserRepository.findById"))
   })
   List<TweetEntity> findAll();
 
@@ -50,20 +47,15 @@ public interface TweetRepository {
 
   @Select("SELECT * FROM tweets WHERE user_id = #{id}")
   @Results(value = {
-    @Result(property = "id", column = "id"),
     @Result(property = "user", column = "user_id",
-            one = @One(select = "in.tech_camp.pictweet.repository.UserRepository.findById")),
-    @Result(property = "comments", column = "id", 
-            many = @Many(select = "in.tech_camp.pictweet.repository.CommentRepository.findByTweetId"))
+            one = @One(select = "in.tech_camp.pictweet.repository.UserRepository.findById"))
   })
   List<TweetEntity> findByUserId(Integer id);
 
   @Select("SELECT * FROM tweets WHERE text LIKE CONCAT('%', #{text}, '%')")
   @Results(value = {
     @Result(property = "user", column = "user_id",
-            one = @One(select = "in.tech_camp.pictweet.repository.UserRepository.findById")),
-    @Result(property = "comments", column = "id", 
-            many = @Many(select = "in.tech_camp.pictweet.repository.CommentRepository.findByTweetId"))
+            one = @One(select = "in.tech_camp.pictweet.repository.UserRepository.findById"))
   })
   List<TweetEntity> findByTextContaining(String text);
 }

@@ -22,15 +22,6 @@ public interface CommentRepository {
     })
     List<CommentEntity> findByTweetId(Integer tweetId);
 
-    @Select("SELECT * FROM comments WHERE user_id = #{userId}")
-    @Results(value = {
-      @Result(property = "user", column = "user_id", 
-              one = @One(select = "in.tech_camp.pictweet.repository.UserRepository.findById")),
-      @Result(property = "tweet", column = "tweet_id", 
-              one = @One(select = "in.tech_camp.pictweet.repository.TweetRepository.findById"))
-    })
-    List<CommentEntity> findByUserId(Integer userId);
-
     @Insert("INSERT INTO comments (text, user_id, tweet_id) VALUES (#{text}, #{user.id}, #{tweet.id})")
     void insert(CommentEntity comment);
 }
