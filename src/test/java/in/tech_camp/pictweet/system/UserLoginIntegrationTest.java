@@ -39,7 +39,6 @@ public class UserLoginIntegrationTest {
 
   @BeforeEach
   public void setup() {
-    // テスト用のユーザー情報をセットアップ
     userForm = UserFormFactory.createUser();
     UserEntity userEntity = new UserEntity();
     userEntity.setEmail(userForm.getEmail());
@@ -53,19 +52,15 @@ public class UserLoginIntegrationTest {
   class ユーザーログインができるとき {
     @Test
     public void 保存されているユーザーの情報と合致すればログインができる() throws Exception {
-      // トップページに移動する
       mockMvc.perform(get("/"))
         .andExpect(status().isOk())
         .andExpect(view().name("tweets/index"))
-        // トップページにログインページへ遷移するボタンがあることを確認する
         .andExpect(content().string(org.hamcrest.Matchers.containsString("ログイン")));
 
-      // ログインページに遷移する
       mockMvc.perform(get("/users/login"))
         .andExpect(status().isOk())
         .andExpect(view().name("users/login"));
 
-      // 正しいユーザー情報を入力してログインを試みる
       MvcResult loginResult = mockMvc.perform(post("/login")
         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
         .param("email", userForm.getEmail())
@@ -76,13 +71,10 @@ public class UserLoginIntegrationTest {
         .andReturn();
 
       MockHttpSession session = (MockHttpSession)loginResult.getRequest().getSession();
-      // トップページへ遷移することを確認する
       mockMvc.perform(get("/").session(session))
         .andExpect(status().isOk())
         .andExpect(view().name("tweets/index"))
-        // ログアウトボタンが表示されることを確認する
         .andExpect(content().string(org.hamcrest.Matchers.containsString("logout-btn")))
-        // 新規登録ページへ遷移するボタンが表示されていないことを確認
         .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("新規登録"))));
     }
   }
@@ -91,18 +83,14 @@ public class UserLoginIntegrationTest {
   class ユーザーログインができないとき{
     @Test
     public void 保存されているユーザーの情報と合致しないとログインができない() throws Exception {
-      // トップページに移動する
       mockMvc.perform(get("/"))
         .andExpect(status().isOk())
         .andExpect(view().name("tweets/index"))
-        // トップページにログインページへ遷移するボタンがあることを確認する
         .andExpect(content().string(org.hamcrest.Matchers.containsString("ログイン")));
-      // ログインページに遷移する
       mockMvc.perform(get("/users/login"))
         .andExpect(status().isOk())
         .andExpect(view().name("users/login"));
 
-      // 間違ったユーザー情報でログインを試みる
       mockMvc.perform(post("/login")
         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
         .param("username", "test")
@@ -111,7 +99,6 @@ public class UserLoginIntegrationTest {
       .andExpect(redirectedUrl("/login?error"))
       .andExpect(status().isFound());
 
-      // 再度ログインページにリダイレクトされることを確認する
       mockMvc.perform(get("/users/login"))
         .andExpect(status().isOk())
         .andExpect(view().name("users/login"));

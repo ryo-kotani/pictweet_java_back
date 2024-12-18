@@ -73,7 +73,6 @@ public class TweetPostIntegrationTest {
   class ツイート投稿ができるとき {
     @Test
     public void ログインしたユーザーは新規投稿できる() throws Exception {
-      // ログインする
       MvcResult loginResult = mockMvc.perform(post("/login")
       .contentType(MediaType.APPLICATION_FORM_URLENCODED)
       .param("email", userForm.getEmail())
@@ -84,12 +83,10 @@ public class TweetPostIntegrationTest {
       MockHttpSession session  = (MockHttpSession)loginResult.getRequest().getSession();
       assertNotNull(session);
 
-      // 新規投稿ページへのボタンがあることを確認する
       mockMvc.perform(get("/").session(session))
           .andExpect(status().isOk())
           .andExpect(content().string(containsString("投稿する")));
 
-      // 投稿ページに移動する
       mockMvc.perform(get("/tweets/new").session(session))
           .andExpect(status().isOk())
           .andExpect(view().name("tweets/new"));
@@ -97,7 +94,6 @@ public class TweetPostIntegrationTest {
       List<TweetEntity> tweetsListBeforePost = tweetRepository.findAll();
       Integer initialCount = tweetsListBeforePost.size();
 
-       // フォームに情報を入力する
       mockMvc.perform(post("/tweets").session(session)
           .param("text", tweetForm.getText())
           .param("image", tweetForm.getImage())
@@ -105,12 +101,10 @@ public class TweetPostIntegrationTest {
           .andExpect(status().isFound())
           .andExpect(redirectedUrl("/"));
 
-      // 送信するとTweetテーブルのレコード数が1上がることを確認する
       List<TweetEntity> tweetsListAfterPost = tweetRepository.findAll();
       Integer afterCount = tweetsListAfterPost.size();
       assertEquals(initialCount + 1, afterCount);
 
-      // トップページには先ほど投稿した内容のツイートが存在することを確認する（画像）
       MvcResult pageResult = mockMvc.perform(get("/"))
           .andReturn();
 
@@ -119,7 +113,6 @@ public class TweetPostIntegrationTest {
       Element divElement = document.selectFirst(".content_post[style='background-image: url(" + tweetForm.getImage() + ");']");
       assertNotNull(divElement);
 
-      // トップページには先ほど投稿した内容のツイートが存在することを確認する（テキスト）
       mockMvc.perform(get("/"))
           .andExpect(status().isOk())
           .andExpect(content().string(containsString(tweetForm.getText())));
@@ -130,7 +123,6 @@ public class TweetPostIntegrationTest {
   class ツイート投稿ができないとき {
     @Test
     public void ログインしていないと新規投稿ページに遷移できない() throws Exception {
-      // 新規投稿ページへのボタンがないことを確認する
       mockMvc.perform(get("/"))
           .andExpect(status().isOk())
           .andExpect(content().string(not(containsString("投稿する"))));

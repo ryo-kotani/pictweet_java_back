@@ -1,17 +1,15 @@
 package in.tech_camp.pictweet.form;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import java.util.Set;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ActiveProfiles;
 
-import in.tech_camp.pictweet.form.CommentForm;
-import in.tech_camp.pictweet.validation.ValidationPriority1;
 import in.tech_camp.pictweet.factory.CommentFormFactory;
+import in.tech_camp.pictweet.validation.ValidationPriority1;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;

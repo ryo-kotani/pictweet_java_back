@@ -13,7 +13,6 @@ public class UserFormFactory {
     userForm.setEmail(faker.internet().emailAddress());
     String generatedUsername = faker.name().username();
 
-    // 6文字以内に切り詰める
     if (generatedUsername.length() > 6) {
         generatedUsername = generatedUsername.substring(0, 6);
     }

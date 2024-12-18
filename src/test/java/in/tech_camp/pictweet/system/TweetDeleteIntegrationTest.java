@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import org.springframework.test.context.ActiveProfiles;
@@ -99,12 +98,10 @@ public class TweetDeleteIntegrationTest {
   class ツイート削除ができるとき {
     @Test
     public void ログインしたユーザーは自らが投稿したツイートの削除ができる() throws Exception {
-      // ツイート1を投稿したユーザーでログインする
       MockHttpSession session = login(mockMvc, userForm1);
 
       assertNotNull(session);
 
-      // ツイート1に「削除」へのリンクがあることを確認する
       MvcResult pageResult = mockMvc.perform(get("/").session(session))
           .andReturn();
       String topPageContent = pageResult.getResponse().getContentAsString();
@@ -118,18 +115,15 @@ public class TweetDeleteIntegrationTest {
       List<TweetEntity> tweetsListBeforeDeletion = tweetRepository.findAll();
       Integer initialCount = tweetsListBeforeDeletion.size();
 
-      // 投稿を削除する
       mockMvc.perform(post("/tweets/{tweetId}/delete",tweetEntity1.getId()).session(session)
           .with(csrf()))
           .andExpect(status().isFound())
           .andExpect(redirectedUrl("/"));
 
-      // 投稿を削除するとレコードの数が1減ることを確認する
       List<TweetEntity> tweetsListAfterDeletion = tweetRepository.findAll();
       Integer afterCount = tweetsListAfterDeletion.size();
       assertEquals(initialCount - 1, afterCount);
 
-      // トップページにはツイート1の内容が存在しないことを確認する（画像）
       MvcResult pageResultAfterDelete = mockMvc.perform(get("/"))
           .andReturn();
       String pageContentAfterDelete = pageResultAfterDelete.getResponse().getContentAsString();
@@ -137,7 +131,6 @@ public class TweetDeleteIntegrationTest {
       Element divElement = documentAfterDelete.selectFirst(".content_post[style='background-image: url(" + tweetForm1.getImage() + ");']");
       assertNull(divElement);
 
-      // トップページにはツイート1の内容が存在しないことを確認する（テキスト）
       mockMvc.perform(get("/"))
           .andExpect(content().string(not(containsString(tweetEntity1.getText()))));
     }
@@ -147,11 +140,9 @@ public class TweetDeleteIntegrationTest {
   class ツイート削除ができないとき {
     @Test
     public void ログインしたユーザーは自分以外が投稿したツイートの削除ができない() throws Exception {
-      // ツイート1を投稿したユーザーでログインする
       MockHttpSession session = login(mockMvc, userForm1);
       assertNotNull(session);
 
-      // ツイート2に「削除」へのリンクがないことを確認する
       MvcResult pageResult = mockMvc.perform(get("/").session(session))
           .andReturn();
       String pageContent = pageResult.getResponse().getContentAsString();
@@ -162,16 +153,13 @@ public class TweetDeleteIntegrationTest {
 
     @Test
     public void ログインしていないとツイートの削除ができない() throws Exception {
-      // ログインせずにトップページにアクセス
       MvcResult pageResult = mockMvc.perform(get("/"))
       .andReturn();
       String pageContent = pageResult.getResponse().getContentAsString();
       Document document = Jsoup.parse(pageContent);
 
-      // ツイート1に「削除」へのリンクがないことを確認する
       Element tweet1DeleteMenuElement = document.selectFirst("form[action='/tweets/" + tweetEntity1.getId() + "/delete']");
       assertNull(tweet1DeleteMenuElement);
-      // ツイート2に「削除」へのリンクがないことを確認する
       Element tweet2DeleteMenuElement = document.selectFirst("form[action='/tweets/" + tweetEntity2.getId() + "/delete']");
       assertNull(tweet2DeleteMenuElement);
     }

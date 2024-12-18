@@ -61,7 +61,7 @@ public class UserFormUnitTest {
 
         @Test
         public void passwordが空では登録できない() {
-            userForm.setPassword(""); // 空のパスワード
+            userForm.setPassword("");
 
             Set<ConstraintViolation<UserForm>> violations = validator.validate(userForm, ValidationPriority1.class);
 
@@ -86,7 +86,7 @@ public class UserFormUnitTest {
 
         @Test
         public void emailはアットマークを含まないと登録できない() {
-            userForm.setEmail("invalidEmail"); // 無効なメール
+            userForm.setEmail("invalidEmail");
             Set<ConstraintViolation<UserForm>> violations = validator.validate(userForm, ValidationPriority2.class);
             assertEquals(1, violations.size());
             assertEquals("Email should be valid", violations.iterator().next().getMessage());
@@ -96,7 +96,7 @@ public class UserFormUnitTest {
         @Test
         public void passwordが5文字以下では登録できない() {
             String password = "a".repeat(5);
-            userForm.setPassword(password); // 短すぎるパスワード
+            userForm.setPassword(password);
             Set<ConstraintViolation<UserForm>> violations = validator.validate(userForm, ValidationPriority2.class);
             violations.forEach(violation -> System.out.println(violation.getMessage()));
             assertEquals(1, violations.size());
@@ -106,7 +106,7 @@ public class UserFormUnitTest {
         @Test
         public void passwordが129文字以上では登録できない() {
             String password = "a".repeat(129);
-            userForm.setPassword(password); // 長すぎるパスワード
+            userForm.setPassword(password);
             Set<ConstraintViolation<UserForm>> violations = validator.validate(userForm, ValidationPriority2.class);
             violations.forEach(violation -> System.out.println(violation.getMessage()));
             assertEquals(1, violations.size());

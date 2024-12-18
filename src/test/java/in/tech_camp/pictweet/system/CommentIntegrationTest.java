@@ -55,7 +55,6 @@ public class CommentIntegrationTest {
 
   @BeforeEach
   public void setup() {
-      // テスト用のユーザー情報をセットアップ
       userForm = UserFormFactory.createUser();
       userEntity = new UserEntity();
       userEntity.setEmail(userForm.getEmail());
@@ -67,10 +66,8 @@ public class CommentIntegrationTest {
 
   @Test
   public void ログインしたユーザーはツイート詳細ページでコメント投稿できる() throws Exception {
-     // ユーザーがログインする
      HttpSession session = login(mockMvc, userForm);
 
-    // ツイートを投稿
     String tweetText = "テストツイート詳細";
     mockMvc.perform(post("/tweets")
             .param("text", tweetText)
@@ -80,34 +77,29 @@ public class CommentIntegrationTest {
             .andExpect(status().isFound())
             .andExpect(redirectedUrl("/"));
 
-    // 投稿されたツイートを取得
     List<TweetEntity> tweets = tweetRepository.findAll();
     Integer tweetId = tweets.get(0).getId();
 
-     // 詳細ページに遷移
      mockMvc.perform(get("/tweets/{tweetId}", tweetId)
              .session((MockHttpSession) session))
              .andExpect(status().isOk())
-             .andExpect(content().string(containsString(tweetText))); // ツイートの内容が含まれているか確認
+             .andExpect(content().string(containsString(tweetText)));
 
-    // コメントを送信
     String commentText = "これはテストコメントです";
     mockMvc.perform(post("/tweets/{tweetId}/comment", tweetId)
-            .param("text", commentText) // コメントのテキストを設定
+            .param("text", commentText)
             .with(csrf())
             .session((MockHttpSession) session))
             .andExpect(status().isFound())
-            .andExpect(redirectedUrl("/tweets/" + tweetId)); // 詳細ページにリダイレクトされることを確認
+            .andExpect(redirectedUrl("/tweets/" + tweetId));
 
-     // コメントテーブルのカウントが1増加しているか確認
-     List<CommentEntity>  comments = commentRepository.findByTweetId(tweets.get(0).getId()); // コメントのカウントを取得するメソッドが必要
+     List<CommentEntity>  comments = commentRepository.findByTweetId(tweets.get(0).getId());
      Integer commentCount = comments.size();
-     assertEquals(1, commentCount); // 初回なのでカウントは1
+     assertEquals(1, commentCount);
 
-    // 詳細ページに再度アクセスして、コメント内容を確認
     mockMvc.perform(get("/tweets/{tweetId}", tweetId)
-    .session((MockHttpSession) session))
-    .andExpect(status().isOk())
-    .andExpect(content().string(containsString(commentText))); // コメント内容が含まれているか確認
+            .session((MockHttpSession) session))
+            .andExpect(status().isOk())
+            .andExpect(content().string(containsString(commentText)));
   }
 }
