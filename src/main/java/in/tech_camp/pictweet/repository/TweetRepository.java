@@ -36,26 +36,30 @@ public interface TweetRepository {
   @Results(value = {
     @Result(property = "id", column = "id"),
     @Result(property = "user", column = "user_id",
-            one = @One(select = "in.tech_camp.pictweet.repository.UserRepository.findById")),
+            one = @One(select = "in.tech_camp.pictweet.repository.UserRepository.findUserById")),
     @Result(property = "comments", column = "id", 
             many = @Many(select = "in.tech_camp.pictweet.repository.CommentRepository.findByTweetId"))
   })
   TweetEntity findById(Integer id);
 
+  @Select("select * from tweets where id = #{id}")
+  TweetEntity findTweetById(Integer id);
+
   @Update("UPDATE tweets SET text = #{text}, image = #{image} WHERE id = #{id}")
   void update(TweetEntity tweet);
 
-  @Select("SELECT * FROM tweets WHERE user_id = #{id}")
+  @Select("select t.*, u.id as user_id, u.nickname as user_nickname from tweets t join users u on t.user_id = u.id where t.user_id = #{userId} order by t.created_at desc")
   @Results(value = {
-    @Result(property = "user", column = "user_id",
-            one = @One(select = "in.tech_camp.pictweet.repository.UserRepository.findById"))
+    @Result(property="id", column="id"),
+    @Result(property="user.id", column="user_id"),
+    @Result(property="user.nickname", column="user_nickname")
   })
   List<TweetEntity> findByUserId(Integer id);
 
   @Select("SELECT * FROM tweets WHERE text LIKE CONCAT('%', #{text}, '%')")
   @Results(value = {
     @Result(property = "user", column = "user_id",
-            one = @One(select = "in.tech_camp.pictweet.repository.UserRepository.findById"))
+            one = @One(select = "in.tech_camp.pictweet.repository.UserRepository.findUserById"))
   })
   List<TweetEntity> findByTextContaining(String text);
 }
